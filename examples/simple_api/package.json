@@ -1,0 +1,8 @@
+{
+  "name": "api-example",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "crud": "git+ssh://git@github.com:uhray/crud.git"
+  }
+}
