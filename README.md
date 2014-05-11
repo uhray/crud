@@ -5,7 +5,7 @@ CRUD is a libary for assisting in creating RESTful api that use [express](https:
 
 ### Simple Example
 
-```
+```js
 var crud = require('crud')(),
     express = require('express'),
     app = express();
