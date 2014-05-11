@@ -46,7 +46,7 @@ Creates an entity on the provided api <i>route</i>. All api routes will be set o
 
 Returns an entity object that follows a [fluent interface](http://en.wikipedia.org/wiki/Fluent_interface). The object is an EntityObject.
 
-<a name="entity-c" href="#entity-c">#</a> EntityObject.<b>c</b>([<i>auth_middlware</i>], <i>callback</i>)
+<a name="entity-c" href="#entity-c">#</a> EntityObject.<b>create</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>c</b>([<i>auth_middlware</i>], <i>callback</i>)
 
 This will create a POST route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
 
@@ -57,7 +57,7 @@ The <i>callback</i> will be called with four arguments:
 * <i>request</i> - express request object
 * <i>response</i> - express response object
 
-<a name="entity-c" href="#entity-r">#</a> EntityObject.<b>r</b>([<i>auth_middlware</i>], <i>callback</i>)
+<a name="entity-r" href="#entity-r">#</a> EntityObject.<b>retrieve</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>r</b>([<i>auth_middlware</i>], <i>callback</i>)
 
 This will create a GET route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
 
@@ -68,7 +68,7 @@ The <i>callback</i> will be called with four arguments:
 * <i>request</i> - express request object
 * <i>response</i> - express response object
 
-<a name="entity-u" href="#entity-u">#</a> EntityObject.<b>u</b>([<i>auth_middlware</i>], <i>callback</i>)
+<a name="entity-u" href="#entity-u">#</a> EntityObject.<b>update</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>u</b>([<i>auth_middlware</i>], <i>callback</i>)
 
 This will create a PUT route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
 
@@ -79,7 +79,7 @@ The <i>callback</i> will be called with four arguments:
 * <i>request</i> - express request object
 * <i>response</i> - express response object
 
-<a name="entity-d" href="#entity-d">#</a> EntityObject.<b>d</b>([<i>auth_middlware</i>], <i>callback</i>)
+<a name="entity-d" href="#entity-d">#</a> EntityObject.<b>delete</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>d</b>([<i>auth_middlware</i>], <i>callback</i>)
 
 This will create a DELETE route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
 
