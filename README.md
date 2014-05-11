@@ -19,6 +19,8 @@ crud.entity('/users')
     .u(update_user)
     .d(delete_user)
 
+crud.launch(app);
+
 function create_user(d, cb) {
   // do create user
   cb(null, true);
