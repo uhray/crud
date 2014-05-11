@@ -3,6 +3,9 @@ CRUD API Creator Library
 
 CRUD is a libary for assisting in creating RESTful api that use [express](https://github.com/visionmedia/express). CRUD allows you to create entities on a route (/users) and add create (c), retrieve (r), update (u), delete (d) methods.
 
+Install with `npm install crud@git+ssh://git@github.com:uhray/crud.git`.
+
+
 ### Simple Example
 
 ```js
