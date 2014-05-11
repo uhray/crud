@@ -1,0 +1,10 @@
+{
+  "name": "crud",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "utools" : "git+ssh://git@github.com:uhray/utools.git"
+  }
+}
+
+
