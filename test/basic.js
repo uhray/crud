@@ -3,7 +3,7 @@ var crud = require('../index.js')(),
     cbax = require('cbax'),
     utools = require('utools'),
     express = require('express'),
-    app = ga();
+    app = express();
 
 crud.entity('/users')
     .c(crud.cb({
@@ -20,6 +20,3 @@ function create_user(d, cb, req, res) {
   cb(null, true);
 }
 
-function ga() {
-  return utools.express_setup(express(), express);
-}
