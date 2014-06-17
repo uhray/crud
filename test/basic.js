@@ -7,14 +7,22 @@ var crud = require('../index.js')(),
     app = express();
 
 crud.entity('/users')
-    .c(crud.cb({
-      username: { type: 'string', description: 'this is my description' }
-    }, create_user))
-    .r(crud.cb(
-      { username: { type: 'string', description: 'this is my description' } },
-      create_user,
-      { username: { type: 'string', description: 'this is my description' } }
-    ))
+    .c(crud.cb(create_user, {
+      params: {
+        username: { type: 'string', description: 'this is my description' }
+      },
+      response : {
+        username: { type: 'string', description: 'this is my description' }
+      }
+    }))
+    .r(crud.cb(create_user, {
+      params: {
+        username: { type: 'string', description: 'this is my description' }
+      },
+      response : {
+        username: { type: 'string', description: 'this is my description' }
+      }
+    }))
     .u(create_user)
     .d(create_user);
 
