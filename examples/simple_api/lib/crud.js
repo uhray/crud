@@ -10,6 +10,6 @@ crud.entity('/users', { description: 'Test users description' })
         username: { type: 'string' }
       }
     }))
-    .retrieve(api.users)
+    .read(api.users)
     .update(api.users)
     .delete(api.users);

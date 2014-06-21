@@ -1,7 +1,7 @@
 CRUD API Creator Library
 ====
 
-CRUD is a libary for assisting in creating RESTful api that use [express](https://github.com/visionmedia/express). CRUD allows you to create entities on a route (/users) and add create (c), retrieve (r), update (u), delete (d) methods.
+CRUD is a libary for assisting in creating RESTful api that use [express](https://github.com/visionmedia/express). CRUD allows you to create entities on a route (/users) and add create (c), read (r), update (u), delete (d) methods.
 
 Install with `npm install crud@git+ssh://git@github.com:uhray/crud.git`.
 
@@ -15,7 +15,7 @@ var crud = require('crud')(),
 
 crud.entity('/users')
     .c(create_user)
-    .r(retrieve_user)
+    .r(read_user)
     .u(update_user)
     .d(delete_user)
 
@@ -26,7 +26,7 @@ function create_user(d, cb) {
   cb(null, true);
 }
 
-function retrieve_user(d, cb) {
+function read_user(d, cb) {
   // do get user
   cb(null, { username: 'example'});
 }
@@ -62,7 +62,7 @@ The <i>callback</i> will be called with four arguments:
 * <i>request</i> - express request object
 * <i>response</i> - express response object
 
-<a name="entity-r" href="#entity-r">#</a> EntityObject.<b>retrieve</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>r</b>([<i>auth_middlware</i>], <i>callback</i>)
+<a name="entity-r" href="#entity-r">#</a> EntityObject.<b>read</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>r</b>([<i>auth_middlware</i>], <i>callback</i>)
 
 This will create a GET route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
 
