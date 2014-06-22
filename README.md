@@ -105,14 +105,16 @@ Console logs markdown documentation of the API.
 
 NOTE: This is under construction.
 
-<a name="cb" href="#cb">#</a> crud.<b>cb</b>(<i>schema</i>, <i>callback</i>)
+<a name="cb" href="#cb">#</a> crud.<b>cb</b>(<i>callback</i>, [<i>options</i>])
 
-This allows you to create a schema for the body (PUT, POST, DELETE routes) or the query (GET routes). This is useful so you don't have to parse the datum in all your callbacks. Also, this is used to help create autodocumentation.
+Options:
+* params:
+  This allows you to create a schema for the body (PUT, POST, DELETE routes) or the query (GET routes). This is useful so you don't have to parse the datum in all your callbacks. Also, this is used to help create autodocumentation.
 
-CRUD uses [jsonschema](https://github.com/tdegrunt/jsonschema) for parsing, so follow its format. If the schema validation fails, CRUD just provides a res.json response with an error so it never gets tothe callback.
+  CRUD uses [jsonschema](https://github.com/tdegrunt/jsonschema) for parsing, so follow its format. If the schema validation fails, CRUD just provides a res.json response with an error so it never gets tothe callback.
 
-NOTE: when creating autodocumentation, CRUD looks at the "description" attribute on the schemas, so use that to help documentation.
-
-NOTE: right now, on GET routes the query response is on not converted to the schema format. All query data is in string format because it comes from the URL. In the future, I'd like to try to convert everything so you can actually get a number in the query datum instead of a string representation. so anything but `{ type: string }` will fail validation on a GET request.
+  NOTE: right now, on GET routes the query response is on not converted to the schema format. All query data is in string format because it comes from the URL. In the future, I'd like to try to convert everything so you can actually get a number in the query datum instead of a string representation. so anything but `{ type: string }` will fail validation on a GET request.
+* response:
+  This allows you to specify the response schema. It's really useful for documentation. Crud uses [debug](https://github.com/visionmedia/debug), so when you run your server with environment variable `DEBUG=crud`, it will log a message if the response object is not correct.
 
 
