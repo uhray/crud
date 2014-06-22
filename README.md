@@ -45,9 +45,14 @@ function delete_user(d, cb) {
 
 ### API
 
-<a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>)
+<a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>, [<i>options</i>])
 
 Creates an entity on the provided api <i>route</i>. All api routes will be set on the express object at /api/{route}.
+
+Options <i>options</i> object can be provided. Options:
+
+* name: give a name to this entity. Used for [autodoc](#autodoc) purposes.
+* description: give a description to this entity. Used for [autodoc](#autodoc) purposes.
 
 Returns an entity object that follows a [fluent interface](http://en.wikipedia.org/wiki/Fluent_interface). The object is an EntityObject.
 
