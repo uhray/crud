@@ -107,7 +107,9 @@ NOTE: This is under construction.
 
 <a name="cb" href="#cb">#</a> crud.<b>cb</b>(<i>callback</i>, [<i>options</i>])
 
-Options:
+The <i>callback</i> is the callback that will be called on this API route.
+
+The <i>options</i> are as follows:
 * params:
   This allows you to create a schema for the body (PUT, POST, DELETE routes) or the query (GET routes). This is useful so you don't have to parse the datum in all your callbacks. Also, this is used to help create autodocumentation.
 
