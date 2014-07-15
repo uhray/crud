@@ -1,6 +1,11 @@
 CRUD API Creator Library
 ====
 
+* [Backend](#backend)
+* [Frontend](#frontend)
+
+## Backend
+
 CRUD is a libary for assisting in creating RESTful api that use [express](https://github.com/visionmedia/express). CRUD allows you to create entities on a route (/users) and add create (c), read (r), update (u), delete (d) methods.
 
 Install with `npm install crud@git+ssh://git@github.com:uhray/crud.git`.
@@ -124,4 +129,113 @@ The <i>options</i> are as follows:
 * response:
   This allows you to specify the response schema. It's really useful for documentation. Crud uses [debug](https://github.com/visionmedia/debug), so when you run your server with environment variable `DEBUG=crud`, it will log a message if the response object is not correct.
 
+## Frontend
 
+CRUD on the frontend is a library for assisting in accessing a RESTful api. CRUD allows you to create (c), read (r), update (u), delete (d) methods.
+
+Install with `bower install crud@git+ssh://git@github.com:uhray/crud.git`.
+
+
+### Simple Example
+
+```js
+
+// Read all users
+crud('/users').read(function(e, users) {
+  console.log('response', e || users);
+});
+
+// Read and update each user
+crud('/users')
+  .on('each', function(d, idx) {
+    console.log('each', d, idx);
+    console.log(this.data === d); // --> true
+    console.log(this == crud('/users', d._id));  // --> true
+    d.read_count++;  // change a value
+    this.update(d);  // PUT an update on the api /users/{d._id}
+  })
+  .read();
+
+// Update example
+crud('/users', '53b705826000a64d08ae5f94');
+  .update({
+    name: 'JOE SCHMO'
+  }, function(e, d) {
+    console.log('updated', e || d);
+  });
+
+
+```
+
+### Configure
+
+You can configure the global crud object via `crud.configure`.
+
+The current configuration is:
+
+```js
+config = {
+  base: '/api',
+  idGetter: '_id'
+};
+```
+
+* <i>base</i>: the base url to send queries to. If `'/api'`, then crud('/users') will send its GET, PUT, POST, DELETE requests to '/api/users'.
+*
+* <i>idGetter</i>: this is for getting the id of each datum if an array is returned. This is useful for `.each` or `.on('each')`.
+
+
+### API
+
+The api is really simple. Basically, you create an <b>EntityObject</a> with `crud('/path/to/entity'). NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) workds.
+
+With an EntityObject, you have the following options:
+
+<a name="eo-crud" href="#eo-crud">#</a> EntityObject.{<b>create,read,update,delete</b>}([<i>params</i>, <i>callback</i>])
+
+(or EntityObject.{c,r,u,d})
+
+These commands are used to query the route.
+
+* <i>params</i>: queries api with given params.
+* <i>callback</i>: callback function when query returns
+
+NOTE: in addition to invoking the callback, upon a reponse events will be emitted.
+
+<a name="eo-path" href="#eo-path">#</a> EntityObject.<b>path</b>
+
+EntityObject.path gives you the path for the created object.
+
+<a name="eo-each" href="#eo-each">#</a> EntityObject.<b>each</b>(<i>fn</i>)
+
+Will call the <i>fn</i> for each object in the EntityObject.data value.
+
+The <i>fn</i> is called with (datum, idx). When the fn is called, the context is the context of the specific datum.
+
+Example:
+
+```js
+crud('/users').read(function(e, users) {
+  this.each(function(d, idx) {
+    console.log(d === users[idx]);  // --> true
+    console.log(this == crud('/users', d._id));  // --> true
+    console.log(this.path == crud('/users', d._id).path);  // --> true
+    console.log(this.path == '/users' + d._id);  // --> true
+  });
+})
+
+```
+
+### Events
+
+The following events can be listened to via normal event emitters: `.on(event, fn)` or `.once(event, fn);
+
+* create: emitted on a successful create. Arguments: (<i>data</i>).
+
+* read: emitted on a successful read. Arguments: (<i>data</i>).
+
+* update: emitted on a successful update. Arguments: (<i>data</i>).
+
+* delete: emitted on a successful delete. Arguments: (<i>data</i>).
+
+* each: emitted on a successful read that receives an array. The Arguments are the same as the [EntityObject.each](#eo-each) fn call. For a read that returns an array, it is called for each value.
