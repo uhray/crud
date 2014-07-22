@@ -62,7 +62,7 @@ define([], function() {
           self.emitCtx('each', this, d, i);
         });
       }
-      args.cb && args.cb.call(this, e, d);
+      args.cb && args.cb.call(self, e, d);
     });
     return this;
   };
