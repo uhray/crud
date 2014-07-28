@@ -140,7 +140,8 @@ define([], function() {
                   ? new XMLHttpRequest()
                   : new ActiveXObject('Microsoft.XMLHTTP');
       req.open(method, url, true);
-      req.setRequestHeader('Content-type', 'application/json');
+      if (!(data instanceof FormData))
+        req.setRequestHeader('Content-type', 'application/json');
       req.onreadystatechange = function() {
         var status, data, error;
         if (req.readyState == 4) {  // done
@@ -157,7 +158,8 @@ define([], function() {
           return cb && cb(error, data);
         }
       }
-      if (data) req.send(JSON.stringify(data));
+      if (data && data instanceof FormData) req.send(data);
+      else if (data) req.send(JSON.stringify(data));
       else req.send();
     }
 
@@ -480,4 +482,5 @@ define([], function() {
   }
 
 });
+
 
