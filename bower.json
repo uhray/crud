@@ -1,4 +1,12 @@
 {
   "name": "crud",
+  "main": "crud.js",
+  "ignore": [
+    "examples/*",
+    "lib/*",
+    "test/*",
+    "*.md",
+    "package.json"
+  ],
   "dependencies": { }
 }
