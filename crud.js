@@ -37,10 +37,7 @@ define([], function() {
 
     tools.request('POST', url, args.data, function(e, d) {
       if (e && !args.cb) self.emit('error', e);
-      if (!e && d) {
-        c = crud(self.path, d[config.idGetter]);
-        self.emit('create', d);
-      }
+      if (!e && d) self.emit('create', d);
       args.cb && args.cb.call(self, e, d);
     });
 
