@@ -78,7 +78,7 @@ define([], function() {
     return this;
   };
 
-  crud.prototype.delete = crud.prototype.d = function() {
+  crud.prototype.del = crud.prototype.d = function() {
     var self = this,
         args = tools.xhr_args.apply(this, arguments),
         url = tools.join(config.base, this.path);
@@ -135,10 +135,11 @@ define([], function() {
     tools.request = function(method, url, data, cb) {
       var req = typeof(XMLHttpRequest) != 'undefined'
                   ? new XMLHttpRequest()
-                  : new ActiveXObject('Microsoft.XMLHTTP');
+                  : new ActiveXObject('Microsoft.XMLHTTP'),
+          isjson = typeof(FormData) === 'undefined' ||
+                        !(data instanceof FormData);
       req.open(method, url, true);
-      if (!(data instanceof FormData))
-        req.setRequestHeader('Content-type', 'application/json');
+      if (isjson) req.setRequestHeader('Content-type', 'application/json');
       req.onreadystatechange = function() {
         var status, data, error;
         if (req.readyState == 4) {  // done
@@ -155,7 +156,7 @@ define([], function() {
           return cb && cb(error, data);
         }
       }
-      if (data && data instanceof FormData) req.send(data);
+      if (!isjson) req.send(data);
       else if (data) req.send(JSON.stringify(data));
       else req.send();
     }
@@ -479,5 +480,6 @@ define([], function() {
   }
 
 });
+
 
 
