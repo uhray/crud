@@ -191,9 +191,11 @@ The api is really simple. Basically, you create an <b>EntityObject</a> with `cru
 
 With an EntityObject, you have the following options:
 
-<a name="eo-crud" href="#eo-crud">#</a> EntityObject.{<b>create,read,update,delete</b>}([<i>params</i>, <i>callback</i>])
+<a name="eo-crud" href="#eo-crud">#</a> EntityObject.{<b>create,read,update,del</b>}([<i>params</i>, <i>callback</i>])
 
 (or EntityObject.{c,r,u,d})
+
+NOTE: del not delete for browser compatability with old browsers that discourage `delete`.
 
 These commands are used to query the route.
 

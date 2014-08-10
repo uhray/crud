@@ -1,7 +1,6 @@
 {
   "name": "crud",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
   "dependencies": {
     "utools": "git://github.com/uhray/utools.git",
     "jsonschema": "^0.4.0",
