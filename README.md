@@ -14,7 +14,7 @@ Install with `npm install crud@git+ssh://git@github.com:uhray/crud.git`.
 ### Simple Example
 
 ```js
-var crud = require('crud')(),
+var crud = require('node-crud')(),
     express = require('express'),
     app = express();
 
