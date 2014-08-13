@@ -54,7 +54,7 @@ function delete_user(d, cb) {
 
 Creates an entity on the provided API <i>route</i>. All API routes will be set on the express object at /api/{route}.
 
-Options <i>options</i> object can be provided. Options:
+An optional <i>options</i> object can be provided. Available options:
 
 * <i>name</i> - give a name to this entity. Used for [autodoc](#autodoc) purposes.
 * <i>description</i> - give a description to this entity. Used for [autodoc](#autodoc) purposes.
