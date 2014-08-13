@@ -199,10 +199,10 @@ NOTE: del not delete for browser compatability with old browsers that discourage
 
 These commands are used to query the route.
 
-* <i>params</i>: queries API with given params.
+* <i>params</i>: queries API with given params
 * <i>callback</i>: callback function when query returns
 
-NOTE: in addition to invoking the callback, upon a reponse events will be emitted.
+NOTE: in addition to invoking the callback, events will be emitted upon a response.
 
 <a name="eo-path" href="#eo-path">#</a> EntityObject.<b>path</b>
 
