@@ -187,7 +187,7 @@ config = {
 
 ### API
 
-The API is really simple. Basically, you create an <b>EntityObject</a> with `crud('/path/to/entity'). NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) workds.
+The API is really simple. Basically, you create an <b>EntityObject</b> with `crud('/path/to/entity')`. NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) works.
 
 With an EntityObject, you have the following options:
 
