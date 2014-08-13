@@ -52,7 +52,7 @@ function delete_user(d, cb) {
 
 <a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>, [<i>options</i>])
 
-Creates an entity on the provided api <i>route</i>. All api routes will be set on the express object at /api/{route}.
+Creates an entity on the provided API <i>route</i>. All API routes will be set on the express object at /api/{route}.
 
 Options <i>options</i> object can be provided. Options:
 
@@ -131,7 +131,7 @@ The <i>options</i> are as follows:
 
 ## Frontend
 
-CRUD on the frontend is a library for assisting in accessing a RESTful api. CRUD allows you to create (c), read (r), update (u), delete (d) methods.
+CRUD on the frontend is a library for assisting in accessing a RESTful API. CRUD allows you to create (c), read (r), update (u), delete (d) methods.
 
 Install with `bower install crud@git+ssh://git@github.com:uhray/crud.git`.
 
@@ -187,7 +187,7 @@ config = {
 
 ### API
 
-The api is really simple. Basically, you create an <b>EntityObject</a> with `crud('/path/to/entity'). NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) workds.
+The API is really simple. Basically, you create an <b>EntityObject</a> with `crud('/path/to/entity'). NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) workds.
 
 With an EntityObject, you have the following options:
 
@@ -199,7 +199,7 @@ NOTE: del not delete for browser compatability with old browsers that discourage
 
 These commands are used to query the route.
 
-* <i>params</i>: queries api with given params.
+* <i>params</i>: queries API with given params.
 * <i>callback</i>: callback function when query returns
 
 NOTE: in addition to invoking the callback, upon a reponse events will be emitted.
