@@ -96,7 +96,7 @@ The <i>callback</i> will be called with four arguments:
 
 <a name="entity-d" href="#entity-d">#</a> EntityObject.<b>delete</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>d</b>([<i>auth_middlware</i>], <i>callback</i>)
 
-This will create a DELETE route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
+This will create a DELETE route for deleting an existing entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
 
 The <i>callback</i> will be called with four arguments:
 
