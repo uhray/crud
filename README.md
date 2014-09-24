@@ -6,7 +6,7 @@ CRUD API Creator Library
 
 ## Backend
 
-CRUD is a libary for assisting in creating RESTful api that use [express](https://github.com/visionmedia/express). CRUD allows you to create entities on a route (/users) and add create (c), read (r), update (u), delete (d) methods.
+CRUD is a libary for assisting in creating RESTful APIs that use [express](https://github.com/visionmedia/express). CRUD allows you to create entities on a route (/users) and add create (c), read (r), update (u), delete (d) methods.
 
 Install with `npm install crud@git+ssh://git@github.com:uhray/crud.git`.
 
@@ -52,9 +52,9 @@ function delete_user(d, cb) {
 
 <a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>, [<i>options</i>])
 
-Creates an entity on the provided api <i>route</i>. All api routes will be set on the express object at /api/{route}.
+Creates an entity on the provided API <i>route</i>. All API routes will be set on the express object at /api/{route}.
 
-Options <i>options</i> object can be provided. Options:
+An optional <i>options</i> object can be provided. Available options:
 
 * <i>name</i> - give a name to this entity. Used for [autodoc](#autodoc) purposes.
 * <i>description</i> - give a description to this entity. Used for [autodoc](#autodoc) purposes.
@@ -96,7 +96,7 @@ The <i>callback</i> will be called with four arguments:
 
 <a name="entity-d" href="#entity-d">#</a> EntityObject.<b>delete</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>d</b>([<i>auth_middlware</i>], <i>callback</i>)
 
-This will create a DELETE route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
+This will create a DELETE route for deleting an existing entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
 
 The <i>callback</i> will be called with four arguments:
 
@@ -121,9 +121,9 @@ The <i>callback</i> is the callback that will be called on this API route.
 
 The <i>options</i> are as follows:
 * params:
-  This allows you to create a schema for the body (PUT, POST, DELETE routes) or the query (GET routes). This is useful so you don't have to parse the datum in all your callbacks. Also, this is used to help create autodocumentation.
+  This allows you to create a schema for the body (PUT, POST, DELETE routes) or the query (GET routes). This is useful so you don't have to parse the datum in all your callbacks. Also, this is used to help automatically create documentation.
 
-  CRUD uses [jsonschema](https://github.com/tdegrunt/jsonschema) for parsing, so follow its format. If the schema validation fails, CRUD just provides a res.json response with an error so it never gets tothe callback.
+  CRUD uses [jsonschema](https://github.com/tdegrunt/jsonschema) for parsing, so follow its format. If the schema validation fails, CRUD just provides a res.json response with an error so it never gets to the callback.
 
   NOTE: right now, on GET routes the query response is on not converted to the schema format. All query data is in string format because it comes from the URL. In the future, I'd like to try to convert everything so you can actually get a number in the query datum instead of a string representation. so anything but `{ type: string }` will fail validation on a GET request.
 * response:
@@ -131,7 +131,7 @@ The <i>options</i> are as follows:
 
 ## Frontend
 
-CRUD on the frontend is a library for assisting in accessing a RESTful api. CRUD allows you to create (c), read (r), update (u), delete (d) methods.
+CRUD on the frontend is a library for assisting in accessing a RESTful API. CRUD allows you to create (c), read (r), update (u), delete (d) methods.
 
 Install with `bower install crud@git+ssh://git@github.com:uhray/crud.git`.
 
@@ -190,7 +190,7 @@ config = {
 
 ### API
 
-The api is really simple. Basically, you create an <b>EntityObject</a> with `crud('/path/to/entity'). NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) workds.
+The API is really simple. Basically, you create an <b>EntityObject</b> with `crud('/path/to/entity')`. NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) works.
 
 With an EntityObject, you have the following options:
 
@@ -202,10 +202,10 @@ NOTE: del not delete for browser compatability with old browsers that discourage
 
 These commands are used to query the route.
 
-* <i>params</i>: queries api with given params.
+* <i>params</i>: queries API with given params
 * <i>callback</i>: callback function when query returns
 
-NOTE: in addition to invoking the callback, upon a reponse events will be emitted.
+NOTE: in addition to invoking the callback, events will be emitted upon a response.
 
 <a name="eo-path" href="#eo-path">#</a> EntityObject.<b>path</b>
 
