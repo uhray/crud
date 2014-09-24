@@ -176,13 +176,16 @@ The current configuration is:
 ```js
 config = {
   base: '/api',
-  idGetter: '_id'
+  idGetter: '_id',
+  protocol: ''
 };
 ```
 
 * <i>base</i>: the base url to send queries to. If `'/api'`, then crud('/users') will send its GET, PUT, POST, DELETE requests to '/api/users'.
-*
+
 * <i>idGetter</i>: this is for getting the id of each datum if an array is returned. This is useful for `.each` or `.on('each')`.
+
+* <i>protocol</i>: this allows you to to change the request protocol (`'http://'`, `'https://'`, etc). By default it posts to `'/api'`, so it will use the protocol the page is accessed through.
 
 
 ### API

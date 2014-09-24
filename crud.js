@@ -3,7 +3,8 @@ define([], function() {
       Emitter = get_emitter(),
       config = {
         base: '/api',
-        idGetter: '_id'
+        idGetter: '_id',
+        protocol: ''
       };
 
   function crud() {
@@ -47,7 +48,7 @@ define([], function() {
   crud.prototype.read = crud.prototype.r = function() {
     var self = this,
         args = tools.xhr_args.apply(this, arguments),
-        url = tools.join(config.base, this.path);
+        url = config.protocol + tools.join(config.base, this.path);
 
     tools.request('GET', url, null, function(e, d) {
       self.data = d;
@@ -67,7 +68,7 @@ define([], function() {
   crud.prototype.update = crud.prototype.u = function() {
     var self = this,
         args = tools.xhr_args.apply(this, arguments),
-        url = tools.join(config.base, this.path);
+        url = config.protocol + tools.join(config.base, this.path);
 
     tools.request('PUT', url, args.data, function(e, d) {
       if (e && !args.cb) self.emit('error', e);
@@ -81,7 +82,7 @@ define([], function() {
   crud.prototype.del = crud.prototype.d = function() {
     var self = this,
         args = tools.xhr_args.apply(this, arguments),
-        url = tools.join(config.base, this.path);
+        url = config.protocol + tools.join(config.base, this.path);
 
     tools.request('DELETE', url, args.data, function(e, d) {
       if (e && !args.cb) self.emit('error', e);
@@ -480,6 +481,4 @@ define([], function() {
   }
 
 });
-
-
 
