@@ -1,6 +1,6 @@
 {
   "name": "crud",
-  "main": "crud.js",
+  "main": "dist/crud.js",
   "ignore": [
     "examples/*",
     "lib/*",

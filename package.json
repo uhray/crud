@@ -1,11 +1,14 @@
 {
   "name": "node-crud",
   "version": "1.0.0",
+  "main": "lib/crud.js",
   "dependencies": {
-    "utools": "git://github.com/uhray/utools.git#1.0.0",
-    "jsonschema": "^0.4.0",
     "debug": "^1.0.2",
-    "ejs": "^1.0.0",
-    "connect-timeout": "^1.2.1"
+    "connect-timeout": "^1.2.1",
+    "require-dir": "^0.1.0"
+  },
+  "devDependencies": {
+    "express": "^4.9.7",
+    "body-parser": "^1.9.0"
   }
 }
