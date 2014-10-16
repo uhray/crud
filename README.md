@@ -1,139 +1,188 @@
 CRUD API Creator Library
 ====
 
-* [Backend](#backend)
-* [Frontend](#frontend)
+* [Backend](#backend) - for creating a REST API server
+* [Frontend](#frontend) - for retrieving data from a REST API
 
 ## Backend
 
-CRUD is a libary for assisting in creating RESTful APIs that use [express](https://github.com/visionmedia/express). CRUD allows you to create entities on a route (/users) and add create (c), read (r), update (u), delete (d) methods.
+CRUD is a libary for assisting in **creating RESTful APIs that use [express](https://github.com/visionmedia/express)**. CRUD allows you to create entities on a route (say `/users`) and design create, read, update, and delete methods.
 
-Install with `npm install crud@git+ssh://git@github.com:uhray/crud.git`.
+Install with `npm install node-crud`.
 
 
 ### Simple Example
 
 ```js
-var crud = require('node-crud')(),
+
+var crud = require('crud'),
     express = require('express'),
     app = express();
 
-crud.entity('/users')
-    .c(create_user)
-    .r(read_user)
-    .u(update_user)
-    .d(delete_user)
+// set up some express middleware
+app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(require('body-parser').json());
+
+// Let's create our first Crud API route
+crud.entity('/users').Read()
+  .use(function(req, res, next) {
+    // express middleware capability
+    next();
+  })
+  .pipe(function(data, query, cb) {
+    cb(null, [ { name: 'bobby tables' } ]);
+  });
 
 crud.launch(app);
 
-function create_user(d, cb) {
-  // do create user
-  cb(null, true);
-}
-
-function read_user(d, cb) {
-  // do get user
-  cb(null, { username: 'example'});
-}
-
-function update_user(d, cb) {
-  // do update user
-  cb(null, true);
-}
-
-function delete_user(d, cb) {
-  // do delete user
-  cb(null, true);
-}
-
+app.listen(3000);
 ```
+
+Since this is a `Read` -- or an HTTP GET request -- you could go to your browser and see 127.0.0.1:3000/api/users. It would respond with JSON:
+
+```json
+{"error":null,"data":[{"name":"bobby tables"}]}
+```
+
 
 ### API
 
-<a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>, [<i>options</i>])
-
-Creates an entity on the provided API <i>route</i>. All API routes will be set on the express object at /api/{route}.
-
-An optional <i>options</i> object can be provided. Available options:
-
-* <i>name</i> - give a name to this entity. Used for [autodoc](#autodoc) purposes.
-* <i>description</i> - give a description to this entity. Used for [autodoc](#autodoc) purposes.
-
-Returns an entity object that follows a [fluent interface](http://en.wikipedia.org/wiki/Fluent_interface). The object is an EntityObject.
-
-<a name="entity-c" href="#entity-c">#</a> EntityObject.<b>create</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>c</b>([<i>auth_middlware</i>], <i>callback</i>)
-
-This will create a POST route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
-
-The <i>callback</i> will be called with four arguments:
-
-* <i>datum</i> - this is the request body
-* <i>callback</i> - the response callback function. It expects (<i>error</i>, <i>data</i>) and will respond with json formatted { error: error, data: data }.
-* <i>request</i> - express request object
-* <i>response</i> - express response object
-
-<a name="entity-r" href="#entity-r">#</a> EntityObject.<b>read</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>r</b>([<i>auth_middlware</i>], <i>callback</i>)
-
-This will create a GET route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
-
-The <i>callback</i> will be called with four arguments:
-
-* <i>datum</i> - this is the request query
-* <i>callback</i> - the response callback function. It expects (<i>error</i>, <i>data</i>) and will respond with json formatted { error: error, data: data }.
-* <i>request</i> - express request object
-* <i>response</i> - express response object
-
-<a name="entity-u" href="#entity-u">#</a> EntityObject.<b>update</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>u</b>([<i>auth_middlware</i>], <i>callback</i>)
-
-This will create a PUT route for creating a new entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
-
-The <i>callback</i> will be called with four arguments:
-
-* <i>datum</i> - this is the request body
-* <i>callback</i> - the response callback function. It expects (<i>error</i>, <i>data</i>) and will respond with json formatted { error: error, data: data }.
-* <i>request</i> - express request object
-* <i>response</i> - express response object
-
-<a name="entity-d" href="#entity-d">#</a> EntityObject.<b>delete</b>([<i>auth_middlware</i>], <i>callback</i>), EntityObject.<b>d</b>([<i>auth_middlware</i>], <i>callback</i>)
-
-This will create a DELETE route for deleting an existing entity. Optionally, you can pass <i>auth_middlware</i> to restrict access to this route before the CRUD middleware takes over.
-
-The <i>callback</i> will be called with four arguments:
-
-* <i>datum</i> - this is the request body
-* <i>callback</i> - the response callback function. It expects (<i>error</i>, <i>data</i>) and will respond with json formatted { error: error, data: data }.
-* <i>request</i> - express request object
-* <i>response</i> - express response object
-
 <a name="launch" href="#launch">#</a> crud.<b>launch</b>(<i>app</i>)
 
-Launches all express routes on the express <i>app</i> object.
+Tells crud to launch the application and begin listening for the routes. The *app* is the required [Express](http://expressjs.com/) application for listening.
 
-<a name="autodoc" href="#autodoc">#</a> crud.<b>autodoc</b>()
+<a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>)
 
-Console logs markdown documentation of the API.
+Creates an entity on the provided API <i>route</i>. All API routes will be set on the express object at `/api/{route}`.
 
-NOTE: This is under construction.
+If you have already created an EntityObject for the same route, this will not create a new one but instead return the old one. This means the following:
 
-<a name="cb" href="#cb">#</a> crud.<b>cb</b>(<i>callback</i>, [<i>options</i>])
+```js
+crud.entity('/users') === crud.entity('/users')  // ==> true
+```
 
-The <i>callback</i> is the callback that will be called on this API route.
+This returns an EntityObject, with these four methods:
 
-The <i>options</i> are as follows:
-* params:
-  This allows you to create a schema for the body (PUT, POST, DELETE routes) or the query (GET routes). This is useful so you don't have to parse the datum in all your callbacks. Also, this is used to help automatically create documentation.
+  * EntityObject.<b>Create</b>() - listens for a POST request
+  * EntityObject.<b>Read</b>() - listens for a GET request
+  * EntityObject.<b>Update</b>() - listens for a PUT request
+  * EntityObject.<b>Delete</b>() - listens for a DELETE request
 
-  CRUD uses [jsonschema](https://github.com/tdegrunt/jsonschema) for parsing, so follow its format. If the schema validation fails, CRUD just provides a res.json response with an error so it never gets to the callback.
+Each of these methods returns a MethodObject with the following API:
 
-  NOTE: right now, on GET routes the query response is on not converted to the schema format. All query data is in string format because it comes from the URL. In the future, I'd like to try to convert everything so you can actually get a number in the query datum instead of a string representation. so anything but `{ type: string }` will fail validation on a GET request.
-* response:
-  This allows you to specify the response schema. It's really useful for documentation. Crud uses [debug](https://github.com/visionmedia/debug), so when you run your server with environment variable `DEBUG=crud`, it will log a message if the response object is not correct.
+### Method Object
+
+Method objects can be retrieved like this:
+
+```js
+var method_obj = crud.entity('/users').Read();
+```
+
+All functions on the method object are chainable. The goal is to create a series of middleware functions that will get called with the GET, POST, PUT, or DELETE data/query (depending on whether it's a Create, Read, Update, or Delete). You can modify data and pass it down the chain.
+
+#### Method Chain Types
+
+<a name="method-use" href="#method-use">#</a> MethodObject.<b>use</b>(<i>fn</i>)
+
+Here you can chain a middleware function with the same API as [Connect](https://github.com/senchalabs/connect). You should be able to place any normal connect middleware here.
+
+The *fn* is the middleware, and it is called with (*request*, *response*, *next*) the same way it would be in Express.
+
+<a name="method-pipe" href="#method-pipe">#</a> MethodObject.<b>pipe</b>(<i>fn</i>)
+
+Here you can chain middleware with the Crud format. This is where the usefulness of Crud really comes into play. The *fn* is called with (*data*, *query*, *callback*):
+
+  * *data* - Initially, this is the data object on the HTTP request, so it will be equivalent to *request.body* from an Express request. 
+
+  * *query* - Initially, this is the data object on the HTTP request, so it will be equivalent to *request.query* from an Express request. (If the url is `/api/users?name=bobby`, then the query is `{ name: 'bobby' }`.
+
+  * *callback* - After you are done, whether synchronously or asynchronously, you can call this callback. It expects any of the following information: (*error*, *data*, *query*). If you provide an error, the chaining will be stopped. If you provided a second argument, it overrides the *data* value for all future chained middleware. If you provide a third argument, it overrides the *query* value for all future chained middleware. If you pass nothing, it just keeps chaining without modifying anything.
+
+Additionally, this `fn` is called with a pretty extensive `this` context:
+
+  * *request* - The Express `request` object.
+
+  * *response* - The Express `response` object.
+
+  * *express* - The original Express middleware context
+
+  * *entity* - This is the Crud entity. So if your route was `/users`, this would be equivalent to `crud.entity('/users')`.
+
+  * *method* -  This is the Crud method. So if your route was `/users` and this was a `Read` method, this would be equivalent to `crud.entity('/users').Read()`.
+
+  * *data* - This is the same as the *data* argument.
+
+  * *query* - This is the same as the *query* argument.
+
+  * *callback* - This is the same as the *callback* argument.
+
+
+#### Method Chain Example
+
+Just to show it in action, you could do the following:
+
+```js
+crud.entity('/users').Read()
+    .use(auth_middleware('root'))
+    .pipe(function(data, query, cb) {
+      // find all users that match the query
+      UserModel.find(query).exec(cb);
+    })
+    .pipe(function(data, query, cb) {
+      // data is now the list of users retrieved
+      console.log('Going to respond with these users: %j', data);
+      cb(null, users);
+    })
+```
+
+### Events
+
+Crud emits some events along the way that can be listened to. Events can be listened to on the Entity, which will fire for all Methods, or on a specific Method.
+
+So, for a method you can listen like this:
+
+```js
+crud.entity('/users').Read()
+    .pipe(/* pipe to something or whatever */)
+    .on('<event>', function() {
+      // event is fired with arguments
+    })
+```
+
+Or, for an Entity you can listen for events and it fires ALL methods:
+
+```js
+crud.entity('/users')
+    .on('<event>', function() {
+      // event is fired with arguments
+    })
+```
+
+The only difference in the event is that the first argument for events listening on an Entity (all methods) is which method the event occured for. The value of this argument will be (`'create'`,`'read'`,`'update'`, or `'delete'`).
+
+All other arguments are specific to the event.
+
+Events:
+
+  * `'open'` - When a new request is started. This is fired before any chaining occurs. Arguments: (`data`, `query`).
+
+  * `'close'` - When a request has completed, the chaining is done, and the response has been sent. Arguments: (`data`).
+ 
+  * `'error'` - When one of the chained functions calls with an error, and the error has been responded from the server. Arguments: (`error`).
+
+
+### Debug
+
+The Crud module has sprinkled some [debug](https://github.com/visionmedia/debug) messages throughout the module. If you wish to turn these on, run your sever with the environment variable `DEBUG=crud` set.
+
 
 ## Frontend
 
-CRUD on the frontend is a library for assisting in accessing a RESTful API. CRUD allows you to create (c), read (r), update (u), delete (d) methods.
+CRUD on the frontend is a library for **assisting in accessing a RESTful API**. CRUD allows you to create (c), read (r), update (u), delete (d) methods.
 
-Install with `bower install crud@git+ssh://git@github.com:uhray/crud.git`.
+Install with `bower install crud`.
+
+Then the file is located in [dist/crud.js](dist/crud.js).
 
 
 ### Simple Example
@@ -244,3 +293,4 @@ The following events can be listened to via normal event emitters: `.on(event, f
 * delete: emitted on a successful delete. Arguments: (<i>data</i>).
 
 * each: emitted on a successful read that receives an array. The Arguments are the same as the [EntityObject.each](#eo-each) fn call. For a read that returns an array, it is called for each value.
+
