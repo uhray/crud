@@ -2,11 +2,12 @@
   "name": "node-crud",
   "version": "2.0.2",
   "main": "lib/crud.js",
-  "repository" : "git@github.com:uhray/crud.git",
+  "repository": "git@github.com:uhray/crud.git",
   "dependencies": {
     "debug": "^1.0.2",
     "connect-timeout": "^1.2.1",
-    "require-dir": "^0.1.0"
+    "require-dir": "^0.1.0",
+    "cors": "^2.4.2"
   },
   "devDependencies": {
     "express": "^4.9.7",

@@ -51,6 +51,14 @@ Since this is a `Read` -- or an HTTP GET request -- you could go to your browser
 
 Tells crud to launch the application and begin listening for the routes. The *app* is the required [Express](http://expressjs.com/) application for listening.
 
+<a name="configure" href="#configure">#</a> crud.<b>configure</b>(<i>options</i>)
+
+You can provide configurations to to the crud API. The *options* object is a key-value object that is merged onto the default configurations.
+
+Options:
+
+  * *cors* - `Boolean` (default=false) - whether to enable cross-site requests using the [cors](https://www.npmjs.org/package/cors) module.
+
 <a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>)
 
 Creates an entity on the provided API <i>route</i>. All API routes will be set on the express object at `/api/{route}`.
