@@ -102,7 +102,7 @@ Here you can chain middleware with the Crud format. This is where the usefulness
 
   * *data* - Initially, this is the data object on the HTTP request, so it will be equivalent to *request.body* from an Express request. 
 
-  * *query* - Initially, this is the data object on the HTTP request, so it will be equivalent to *request.query* from an Express request. (If the url is `/api/users?name=bobby`, then the query is `{ name: 'bobby' }`. **HOWEVER**, this is not actually just the same as *request.query*, because it has the *request.params* merged in as well. So, if you were had `crud('/users/_id').Read()` and the url was `/api/users/7?name=bobby`, then the query is actually `{name: 'bobby', _id: 7}`.
+  * *query* - Initially, this is the query object on the HTTP request, so it will be equivalent to *request.query* from an Express request. (If the url is `/api/users?name=bobby`, then the query is `{ name: 'bobby' }`. **HOWEVER**, this is not actually just the same as *request.query*, because it has the *request.params* merged in as well. So, if you had `crud('/users/:_id').Read()` and the url was `/api/users/7?name=bobby`, then the query is actually `{name: 'bobby', _id: 7}`.
 
   * *callback* - After you are done, whether synchronously or asynchronously, you can call this callback. It expects any of the following information: (*error*, *data*, *query*). If you provide an error, the chaining will be stopped. If you provided a second argument, it overrides the *data* value for all future chained middleware. If you provide a third argument, it overrides the *query* value for all future chained middleware. If you pass nothing, it just keeps chaining without modifying anything.
 
