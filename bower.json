@@ -2,9 +2,9 @@
   "name": "crud",
   "main": "dist/crud.js",
   "ignore": [
-    "examples/*",
-    "lib/*",
-    "test/*",
+    "examples/**",
+    "lib/**",
+    "test/**",
     "*.md",
     "package.json"
   ],

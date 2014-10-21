@@ -4,7 +4,8 @@ define([], function() {
       config = {
         base: '/api',
         idGetter: '_id',
-        protocol: ''
+        protocol: '',
+        credentials: false
       };
 
   function crud() {
