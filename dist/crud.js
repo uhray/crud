@@ -34,7 +34,7 @@ define([], function() {
   crud.prototype.create = crud.prototype.c = function() {
     var self = this,
         args = tools.xhr_args.apply(this, arguments),
-        url = tools.join(config.base, this.path);
+        url = config.protocol + tools.join(config.base, this.path);
 
     tools.request('POST', url, args.data, function(e, d) {
       if (e && !args.cb) self.emit('error', e);
@@ -119,8 +119,8 @@ define([], function() {
     }
 
     tools.join = function() {
-      return ('/' + tools.argArray(arguments).join('/'))
-              .replace(/\/+/g, '/');
+      return tools.argArray(arguments).join('/')
+                  .replace(/\/+/g, '/');
     }
 
     tools.merge = function(a, b) {
@@ -139,7 +139,10 @@ define([], function() {
                   : new ActiveXObject('Microsoft.XMLHTTP'),
           isjson = typeof(FormData) === 'undefined' ||
                         !(data instanceof FormData);
+
+      if (config.credentials) req.withCredentials = true;
       req.open(method, url, true);
+
       if (isjson) req.setRequestHeader('Content-type', 'application/json');
       req.onreadystatechange = function() {
         var status, data, error;
@@ -481,4 +484,3 @@ define([], function() {
   }
 
 });
-

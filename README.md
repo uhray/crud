@@ -57,7 +57,7 @@ You can provide configurations to to the crud API. The *options* object is a key
 
 Options:
 
-  * *cors* - `Boolean` (default=false) - whether to enable cross-site requests using the [cors](https://www.npmjs.org/package/cors) module.
+  * *cors* - `Boolean` (default=false) - whether to enable cross-site requests using the [cors](https://www.npmjs.org/package/cors) module. If truthy and not an object, it creates a configuration for [cors](https://www.npmjs.org/package/cors) that allows all origins to request cross-origin and allows credentials to be stored. If the configuration is an object, this object will be passed as the options to the [cors](https://www.npmjs.org/package/cors) middleware.
 
 <a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>)
 
@@ -234,7 +234,8 @@ The current configuration is:
 config = {
   base: '/api',
   idGetter: '_id',
-  protocol: ''
+  protocol: '',
+  credentials: false
 };
 ```
 
@@ -244,6 +245,7 @@ config = {
 
 * <i>protocol</i>: this allows you to to change the request protocol (`'http://'`, `'https://'`, etc). By default it posts to `'/api'`, so it will use the protocol the page is accessed through.
 
+* <i>credentials</i>: this allows you to have cross-origin requests that store credentialed information. It's good for creating an app that accesses an API on another url.
 
 ### API
 
