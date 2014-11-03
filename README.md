@@ -58,6 +58,7 @@ You can provide configurations to to the crud API. The *options* object is a key
 Options:
 
   * *cors* - `Boolean` (default=false) - whether to enable cross-site requests using the [cors](https://www.npmjs.org/package/cors) module. If truthy and not an object, it creates a configuration for [cors](https://www.npmjs.org/package/cors) that allows all origins to request cross-origin and allows credentials to be stored. If the configuration is an object, this object will be passed as the options to the [cors](https://www.npmjs.org/package/cors) middleware.
+  * *base* - `String` (default='/api') - the base url route of the API. All routes will be nested after these. A common example of changing this would be to something like `'/api/v1'`.
 
 <a name="entity" href="#entity">#</a> crud.<b>entity</b>(<i>route</i>)
 
