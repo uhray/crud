@@ -175,7 +175,7 @@ Events:
 
   * `'open'` - When a new request is started. This is fired before any chaining occurs. Arguments: (`data`, `query`).
 
-  * `'close'` - When a request has completed, the chaining is done, and the response has been sent. Arguments: (`data`).
+  * `'close'` - When a request has completed, the chaining is done, and the response has been sent. This is not called when there is an error. Arguments: (`data`).
  
   * `'error'` - When one of the chained functions calls with an error, and the error has been responded from the server. Arguments: (`error`).
 
