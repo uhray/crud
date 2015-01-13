@@ -293,7 +293,7 @@ crud('/users').read(function(e, users) {
 
 ### Events
 
-The following events can be listened to via normal event emitters: `.on(event, fn)` or `.once(event, fn);
+The following events can be listened to via normal event emitters: `.on(event, fn)` or `.once(event, fn)`
 
 * create: emitted on a successful create. Arguments: (<i>data</i>).
 
