@@ -100,7 +100,7 @@ define([], function() {
     if (!(data instanceof Array)) return;
 
     for (i = 0; i < data.length; i++) {
-      fn.call(crud(this.path, data[i][config.idGetter]), data[i], idx);
+      fn.call(crud(this.path, data[i][config.idGetter]), data[i], i);
     }
   };
 
@@ -240,6 +240,21 @@ define([], function() {
 
       for (i = 0; i < es.length; i++) {
         es[i].apply(self, args);
+      }
+
+      this.__once[name] = [];
+    }
+
+    Emitter.prototype.emitCtx = function(name, ctx) {
+      var args = [].slice.call(arguments),
+          es = (this.__events[name] || []).slice(),
+          i, self = this;
+
+      args.shift(); args.shift();
+      es.push.apply(es, this.__once[name] || []);
+
+      for (i = 0; i < es.length; i++) {
+        es[i].apply(ctx, args);
       }
 
       this.__once[name] = [];
