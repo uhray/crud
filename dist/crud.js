@@ -104,6 +104,32 @@ define([], function() {
     }
   };
 
+  // crud fns ==================================================================
+
+  crud.parallel = function(obj, cb) {
+    var obj = obj || {},
+        n = Object.keys(obj).length,
+        result = {},
+        count = 0,
+        cb = cb || Function(),
+        done, k;
+
+    tools.forEach(obj, function(path, name) {
+      crud(path).read(function(e, d) {
+        if (e) {
+          done = true;
+          return cb(e, result);
+        }
+
+        result[name] = d;
+        if (++count == n && !done) {
+          done = true;
+          setTimeout(function() { cb(null, result); }, 0);
+        }
+      });
+    });
+  };
+
   return crud;
 
   // tools =====================================================================
@@ -163,6 +189,11 @@ define([], function() {
       if (!isjson) req.send(data);
       else if (data) req.send(JSON.stringify(data));
       else req.send();
+    }
+
+    tools.forEach = function(obj, cb) {
+      var k;
+      for (k in obj) cb(obj[k], k);
     }
 
     return tools;

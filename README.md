@@ -250,6 +250,8 @@ config = {
 
 ### API
 
+#### Entity API
+
 The API is really simple. Basically, you create an <b>EntityObject</b> with `crud('/path/to/entity')`. NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) works.
 
 With an EntityObject, you have the following options:
@@ -289,6 +291,33 @@ crud('/users').read(function(e, users) {
   });
 })
 
+```
+
+#### Utility Functions
+
+Everything stems from the [entity-api], but we are working on utility functions to help making use of that api better.
+
+<a name="crud-parallel" href="#crud-parallel">#</a> crud.<b>parallel</b>(<i>object</i>, <i>callback</i>)
+
+Runs a parallel read on the information queries provided in <i>object</i> and then call callback when done.
+
+* <i>object</i>: a key-value object where the keys are names and the values are paths for urls.
+* <i>callback</i>: callback function when parallel reads are done or when one returns with an error.
+
+Example:
+
+```js
+crud.parallel({
+  users: '/users',
+  records: '/records&limit=10',
+  posts: '/posts?sortBy=name:desc'
+}, function(e, d) {
+  // If everything is successful, the result will be:
+  // { users: USER_RESPONSE, records: RECORDS_RESPONSE, posts: POSTS_RESPONSE }
+  // where USER_RESPONSE is the same as crud('/users').read(fn)
+
+  // If there was en error, it will immediately call this function with e being the error
+});
 ```
 
 ### Events
