@@ -40,7 +40,10 @@ define([], function() {
 
     tools.request('POST', url, args.data, function(e, d) {
       if (e && cb) self.emit('error', e);
-      if (!e && d) self.emit('create', d);
+      if (!e && d) {
+        tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
+        self.emit('create', d);
+      }
       args.cb && args.cb.call(self, e, d);
     });
 
@@ -54,14 +57,15 @@ define([], function() {
 
     tools.request('GET', url, null, function(e, d) {
       self.data = d;
+      tools.defineProperty(d, '_crud', self);
       if (e && !args.cb) self.emit('error', e);
-      if (!e && d) self.emit('read', d);
       if (!e && d instanceof Array) {
         self.each(function(d, i) {
           this.data = d;
           self.emitCtx('each', this, d, i);
         });
       }
+      if (!e && d) self.emit('read', d);
       args.cb && args.cb.call(self, e, d);
     });
     return this;
@@ -74,7 +78,10 @@ define([], function() {
 
     tools.request('PUT', url, args.data, function(e, d) {
       if (e && !args.cb) self.emit('error', e);
-      if (!e && d) self.emit('update', d);
+      if (!e && d) {
+        tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
+        self.emit('update', d);
+      }
       args.cb && args.cb.call(self, e, d);
     });
 
@@ -98,10 +105,13 @@ define([], function() {
   crud.prototype.each = function(fn) {
     var fn = fn || Function(),
         data = this.data || [],
-        i;
+        c, i;
+
     if (!(data instanceof Array)) return;
 
     for (i = 0; i < data.length; i++) {
+      c = crud(this.path, data[i][config.idGetter]);
+      tools.defineProperty(data[i], '_crud', c);
       fn.call(crud(this.path, data[i][config.idGetter]), data[i], i);
     }
   };
@@ -176,9 +186,9 @@ define([], function() {
         var status, data, error;
         if (req.readyState == 4) {  // done
           status = req.status;
-          if (status == 200) {
+          if (status >= 200 && status < 300) {
             try {
-              data = JSON.parse(req.responseText);
+              data = JSON.parse(req.responseText || '{}');
               error = config.getError(data);
               data = config.getData(data);
             } catch (e) { error = 'invalid json response' };
@@ -191,15 +201,22 @@ define([], function() {
       if (!isjson) req.send(data);
       else if (data) req.send(JSON.stringify(data));
       else req.send();
-    }
+    };
 
     tools.forEach = function(obj, cb) {
       var k;
       for (k in obj) cb(obj[k], k);
-    }
+    };
+
+    tools.defineProperty = function(obj, key, val) {
+      Object.defineProperty(obj, key, {
+        enumerable: false,
+        value: val
+      });
+    };
 
     return tools;
-  }
+  };
 
   // emitter ===================================================================
   function get_emitter() {
