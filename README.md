@@ -236,7 +236,9 @@ config = {
   base: '/api',
   idGetter: '_id',
   protocol: '',
-  credentials: false
+  credentials: false,
+  getData: function(d) { return d && d.data; },
+  getError: function(d) { return d && d.error; }
 };
 ```
 
@@ -247,6 +249,10 @@ config = {
 * <i>protocol</i>: this allows you to to change the request protocol (`'http://'`, `'https://'`, etc). By default it posts to `'/api'`, so it will use the protocol the page is accessed through.
 
 * <i>credentials</i>: this allows you to have cross-origin requests that store credentialed information. It's good for creating an app that accesses an API on another url.
+
+* <i>getData</i>: after the response text is converted to JSON, it calls this function to find out the data part of the response.
+
+* <i>getError</i>: after the response text is converted to JSON, it calls this function to find out the error part of the response.
 
 ### API
 

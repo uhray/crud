@@ -5,7 +5,9 @@ define([], function() {
         base: '/api',
         idGetter: '_id',
         protocol: '',
-        credentials: false
+        credentials: false,
+        getData: function(d) { return d && d.data; },
+        getError: function(d) { return d && d.error; }
       };
 
   function crud() {
@@ -177,8 +179,8 @@ define([], function() {
           if (status == 200) {
             try {
               data = JSON.parse(req.responseText);
-              error = data && data.error;
-              data = data && data.data;
+              error = config.getError(data);
+              data = config.getData(data);
             } catch (e) { error = 'invalid json response' };
           } else {
             error = { code: status, message: 'invalid status code' };
