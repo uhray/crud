@@ -26,7 +26,7 @@ define([], function() {
   // Configure =================================================================
 
   crud.configure = crud.config = function(obj) {
-    tools.merge(config, obj || {});
+    return tools.merge(config, obj || {});
   }
 
 
