@@ -39,7 +39,7 @@ define([], function() {
         url = config.protocol + tools.join(config.base, this.path);
 
     tools.request('POST', url, args.data, function(e, d) {
-      if (e && cb) self.emit('error', e);
+      if (e) self.emit('error', e);
       if (!e && d) {
         tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
         self.emit('create', d);
