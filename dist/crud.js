@@ -209,6 +209,7 @@ define([], function() {
     };
 
     tools.defineProperty = function(obj, key, val) {
+      if (!(obj instanceof Object)) return;
       Object.defineProperty(obj, key, {
         enumerable: false,
         value: val
