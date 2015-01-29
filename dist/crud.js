@@ -53,7 +53,8 @@ define([], function() {
   crud.prototype.read = crud.prototype.r = function() {
     var self = this,
         args = tools.xhr_args.apply(this, arguments),
-        url = config.protocol + tools.join(config.base, this.path);
+        url = config.protocol +
+                tools.join(config.base, this.path, args.data || '' );
 
     if (args.data) url = tools.join(url, args.data);
 
