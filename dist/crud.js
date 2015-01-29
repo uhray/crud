@@ -55,6 +55,8 @@ define([], function() {
         args = tools.xhr_args.apply(this, arguments),
         url = config.protocol + tools.join(config.base, this.path);
 
+    if (args.data) url = tools.join(url, args.data);
+
     tools.request('GET', url, null, function(e, d) {
       self.data = d;
       tools.defineProperty(d, '_crud', self);
@@ -157,8 +159,32 @@ define([], function() {
     }
 
     tools.join = function() {
-      return tools.argArray(arguments).join('/')
-                  .replace(/\/+/g, '/');
+      var query = '',
+          arr = tools.argArray(arguments).map(function(d) {
+            var d = typeof d == 'object' ? '?' + tools.serialize(d) : d,
+                s;
+
+            s = d.split('?');
+            if (s.length == 1) return d;
+            if (query) query += '&';
+            query += s[1];
+            return s[0];
+          });
+
+      return arr.join('/').replace(/\/+/g, '/') + (query ? '?' + query : '');
+    }
+
+    tools.serialize = function(obj, prefix) {
+      var str = [], p, k;
+      for (p in obj) {
+        if (obj.hasOwnProperty(p)) {
+          k = prefix ? prefix + '[' + p + ']' : p, v = obj[p];
+          str.push(typeof v == 'object'
+                    ? serialize(v, k)
+                    : encodeURIComponent(k) + '=' + encodeURIComponent(v));
+        }
+      }
+      return str.join('&');
     }
 
     tools.merge = function(a, b) {

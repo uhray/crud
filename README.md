@@ -260,6 +260,8 @@ config = {
 
 The API is really simple. Basically, you create an <b>EntityObject</b> with `crud('/path/to/entity')`. NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) works.
 
+If any of the arguments have query string (e.g. `crud('/users?sortBy=10', '?limit=10)`), the query strings will be joined together. It's important to realize that if you put a query string in the uri path, it will travel with this crud object forever (on updates, etc). So if you just want the query string for a read (for example) you need to put that in the read <i>params</i> (see just below here).
+
 With an EntityObject, you have the following options:
 
 <a name="eo-crud" href="#eo-crud">#</a> EntityObject.{<b>create,read,update,del</b>}([<i>params</i>, <i>callback</i>])
@@ -270,7 +272,7 @@ NOTE: del not delete for browser compatability with old browsers that discourage
 
 These commands are used to query the route.
 
-* <i>params</i>: queries API with given params
+* <i>params</i>: queries API with given params. For read, this will be appended to the URL as a query string. For the rest it will be data that is posted, put, etc.
 * <i>callback</i>: callback function when query returns
 
 NOTE: in addition to invoking the callback, events will be emitted upon a response.
