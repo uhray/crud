@@ -181,7 +181,7 @@ define([], function() {
         if (obj.hasOwnProperty(p)) {
           k = prefix ? prefix + '[' + p + ']' : p, v = obj[p];
           str.push(typeof v == 'object'
-                    ? serialize(v, k)
+                    ? tools.serialize(v, k)
                     : encodeURIComponent(k) + '=' + encodeURIComponent(v));
         }
       }
