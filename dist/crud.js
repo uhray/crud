@@ -165,7 +165,7 @@ define([], function() {
             var d = typeof d == 'object' ? '?' + tools.serialize(d) : d,
                 s;
 
-            s = d.split('?');
+            s = (d || '').split('?');
             if (s.length == 1) return d;
             if (query) query += '&';
             query += s[1];
