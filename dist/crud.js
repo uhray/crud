@@ -54,9 +54,7 @@ define([], function() {
     var self = this,
         args = tools.xhr_args.apply(this, arguments),
         url = config.protocol +
-                tools.join(config.base, this.path, args.data || '' );
-
-    if (args.data) url = tools.join(url, args.data);
+                tools.join(config.base, this.path, args.data || '');
 
     tools.request('GET', url, null, function(e, d) {
       self.data = d;
