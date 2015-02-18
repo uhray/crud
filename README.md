@@ -125,6 +125,8 @@ Additionally, this `fn` is called with a pretty extensive `this` context:
 
   * *callback* - This is the same as the *callback* argument.
 
+  * *close* - Function that will manually close the crud stream.
+
 
 #### Method Chain Example
 
