@@ -33,6 +33,11 @@ define([], function() {
   // crud.prototype ============================================================
   crud.prototype = Emitter.prototype;
 
+  crud.prototype.toJSON = function() {
+    // polyfill so we can have the _crud value and not have it json'ed on IE8
+    return undefined;
+  };
+
   crud.prototype.create = crud.prototype.c = function() {
     var self = this,
         args = tools.xhr_args.apply(this, arguments),
@@ -235,10 +240,14 @@ define([], function() {
 
     tools.defineProperty = function(obj, key, val) {
       if (!(obj instanceof Object)) return;
-      Object.defineProperty(obj, key, {
-        enumerable: false,
-        value: val
-      });
+      try {
+        Object.defineProperty(obj, key, {
+          enumerable: false,
+          value: val
+        });
+      } catch (e) {  // fallback
+        obj[key] = val;
+      }
     };
 
     return tools;
