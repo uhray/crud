@@ -135,6 +135,7 @@ define([], function() {
     tools.forEach(obj, function(path, name) {
       crud(path).read(function(e, d) {
         if (e) {
+          if (done) return;
           done = true;
           return cb(e, result);
         }
