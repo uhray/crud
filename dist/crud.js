@@ -1,159 +1,170 @@
 define([], function() {
-  var tools = get_tools(),
-      Emitter = get_emitter(),
-      config = {
-        base: '/api',
-        idGetter: '_id',
-        protocol: '',
-        credentials: false,
-        getData: function(d) { return d && d.data; },
-        getError: function(d) { return d && d.error; }
-      };
 
-  function crud() {
-    var c;
-    if (!(this instanceof crud)) {
-      c = new crud();
-      c.path = tools.join.apply(c, arguments);
-      return c;
+  return makeCrud();
+
+  function makeCrud(cfg) {
+    var config = {
+          base: '/api',
+          idGetter: '_id',
+          protocol: '',
+          credentials: false,
+          getData: function(d) { return d && d.data; },
+          getError: function(d) { return d && d.error; }
+        },
+        tools = get_tools(config),
+        Emitter = get_emitter(config);
+
+    function crud() {
+      var c;
+      if (!(this instanceof crud)) {
+        c = new crud();
+        c.path = tools.join.apply(c, arguments);
+        return c;
+      }
+
+      if (arguments.length) this.path = tools.join.apply(this, arguments);
+
+      Emitter(this);
     }
 
-    if (arguments.length) this.path = tools.join.apply(this, arguments);
+    tools.merge(config, cfg || {});
 
-    Emitter(this);
-  }
+    // Configure =================================================================
 
-  // Configure =================================================================
-
-  crud.configure = crud.config = function(obj) {
-    return tools.merge(config, obj || {});
-  }
-
-
-  // crud.prototype ============================================================
-  crud.prototype = Emitter.prototype;
-
-  crud.prototype.toJSON = function() {
-    // polyfill so we can have the _crud value and not have it json'ed on IE8
-    return undefined;
-  };
-
-  crud.prototype.create = crud.prototype.c = function() {
-    var self = this,
-        args = tools.xhr_args.apply(this, arguments),
-        url = config.protocol + tools.join(config.base, this.path);
-
-    tools.request('POST', url, args.data, function(e, d) {
-      if (e) self.emit('error', e);
-      if (!e && d) {
-        tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
-        self.emit('create', d);
-      }
-      args.cb && args.cb.call(self, e, d);
-    });
-
-    return this;
-  };
-
-  crud.prototype.read = crud.prototype.r = function() {
-    var self = this,
-        args = tools.xhr_args.apply(this, arguments),
-        url = config.protocol +
-                tools.join(config.base, this.path, args.data || '');
-
-    tools.request('GET', url, null, function(e, d) {
-      self.data = d;
-      tools.defineProperty(d, '_crud', self);
-      if (e && !args.cb) self.emit('error', e);
-      if (!e && d instanceof Array) {
-        self.each(function(d, i) {
-          this.data = d;
-          self.emitCtx('each', this, d, i);
-        });
-      }
-      if (!e && d) self.emit('read', d);
-      args.cb && args.cb.call(self, e, d);
-    });
-    return this;
-  };
-
-  crud.prototype.update = crud.prototype.u = function() {
-    var self = this,
-        args = tools.xhr_args.apply(this, arguments),
-        url = config.protocol + tools.join(config.base, this.path);
-
-    tools.request('PUT', url, args.data, function(e, d) {
-      if (e && !args.cb) self.emit('error', e);
-      if (!e && d) {
-        tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
-        self.emit('update', d);
-      }
-      args.cb && args.cb.call(self, e, d);
-    });
-
-    return this;
-  };
-
-  crud.prototype.del = crud.prototype.d = function() {
-    var self = this,
-        args = tools.xhr_args.apply(this, arguments),
-        url = config.protocol + tools.join(config.base, this.path);
-
-    tools.request('DELETE', url, args.data, function(e, d) {
-      if (e && !args.cb) self.emit('error', e);
-      if (!e && d) self.emit('delete', d);
-      args.cb && args.cb.call(self, e, d);
-    });
-
-    return this;
-  };
-
-  crud.prototype.each = function(fn) {
-    var fn = fn || Function(),
-        data = this.data || [],
-        c, i;
-
-    if (!(data instanceof Array)) return;
-
-    for (i = 0; i < data.length; i++) {
-      c = crud(this.path, data[i][config.idGetter]);
-      tools.defineProperty(data[i], '_crud', c);
-      fn.call(crud(this.path, data[i][config.idGetter]), data[i], i);
+    crud.configure = crud.config = function(obj) {
+      return tools.merge(config, obj || {});
     }
-  };
 
-  // crud fns ==================================================================
 
-  crud.parallel = function(obj, cb) {
-    var obj = obj || {},
-        n = Object.keys(obj).length,
-        result = {},
-        count = 0,
-        cb = cb || Function(),
-        done, k;
+    // crud.prototype ============================================================
+    crud.prototype = Emitter.prototype;
 
-    tools.forEach(obj, function(path, name) {
-      crud(path).read(function(e, d) {
-        if (e) {
-          if (done) return;
-          done = true;
-          return cb(e, result);
+    crud.prototype.toJSON = function() {
+      // polyfill so we can have the _crud value and not have it json'ed on IE8
+      return undefined;
+    };
+
+    crud.prototype.create = crud.prototype.c = function() {
+      var self = this,
+          args = tools.xhr_args.apply(this, arguments),
+          url = config.protocol + tools.join(config.base, this.path);
+
+      tools.request('POST', url, args.data, function(e, d) {
+        if (e) self.emit('error', e);
+        if (!e && d) {
+          tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
+          self.emit('create', d);
         }
-
-        result[name] = d;
-        if (++count == n && !done) {
-          done = true;
-          setTimeout(function() { cb(null, result); }, 0);
-        }
+        args.cb && args.cb.call(self, e, d);
       });
-    });
-  };
 
-  return crud;
+      return this;
+    };
+
+    crud.prototype.read = crud.prototype.r = function() {
+      var self = this,
+          args = tools.xhr_args.apply(this, arguments),
+          url = config.protocol +
+                  tools.join(config.base, this.path, args.data || '');
+
+      tools.request('GET', url, null, function(e, d) {
+        self.data = d;
+        tools.defineProperty(d, '_crud', self);
+        if (e && !args.cb) self.emit('error', e);
+        if (!e && d instanceof Array) {
+          self.each(function(d, i) {
+            this.data = d;
+            self.emitCtx('each', this, d, i);
+          });
+        }
+        if (!e && d) self.emit('read', d);
+        args.cb && args.cb.call(self, e, d);
+      });
+      return this;
+    };
+
+    crud.prototype.update = crud.prototype.u = function() {
+      var self = this,
+          args = tools.xhr_args.apply(this, arguments),
+          url = config.protocol + tools.join(config.base, this.path);
+
+      tools.request('PUT', url, args.data, function(e, d) {
+        if (e && !args.cb) self.emit('error', e);
+        if (!e && d) {
+          tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
+          self.emit('update', d);
+        }
+        args.cb && args.cb.call(self, e, d);
+      });
+
+      return this;
+    };
+
+    crud.prototype.del = crud.prototype.d = function() {
+      var self = this,
+          args = tools.xhr_args.apply(this, arguments),
+          url = config.protocol + tools.join(config.base, this.path);
+
+      tools.request('DELETE', url, args.data, function(e, d) {
+        if (e && !args.cb) self.emit('error', e);
+        if (!e && d) self.emit('delete', d);
+        args.cb && args.cb.call(self, e, d);
+      });
+
+      return this;
+    };
+
+    crud.prototype.each = function(fn) {
+      var fn = fn || Function(),
+          data = this.data || [],
+          c, i;
+
+      if (!(data instanceof Array)) return;
+
+      for (i = 0; i < data.length; i++) {
+        c = crud(this.path, data[i][config.idGetter]);
+        tools.defineProperty(data[i], '_crud', c);
+        fn.call(crud(this.path, data[i][config.idGetter]), data[i], i);
+      }
+    };
+
+    // crud fns ==================================================================
+
+    crud.parallel = function(obj, cb) {
+      var obj = obj || {},
+          n = Object.keys(obj).length,
+          result = {},
+          count = 0,
+          cb = cb || Function(),
+          done, k;
+
+      tools.forEach(obj, function(path, name) {
+        crud(path).read(function(e, d) {
+          if (e) {
+            if (done) return;
+            done = true;
+            return cb(e, result);
+          }
+
+          result[name] = d;
+          if (++count == n && !done) {
+            done = true;
+            setTimeout(function() { cb(null, result); }, 0);
+          }
+        });
+      });
+    };
+
+    crud.create = makeCrud;
+    crud.url = tools.join;
+    crud.serialize = tools.serialize;
+
+    return crud;
+  }
 
   // tools =====================================================================
 
-  function get_tools() {
+  function get_tools(config) {
     var tools = {};
 
     tools.noop = Function();
@@ -174,7 +185,7 @@ define([], function() {
             if (query) query += '&';
             query += s[1];
             return s[0];
-          });
+          }).filter(tools.id);
 
       return arr.join('/').replace(/\/+/g, '/') + (query ? '?' + query : '');
     }
@@ -184,6 +195,7 @@ define([], function() {
       for (p in obj) {
         if (obj.hasOwnProperty(p)) {
           k = prefix ? prefix + '[' + p + ']' : p, v = obj[p];
+          if (v instanceof Date) v = JSON.stringify(v);
           str.push(typeof v == 'object'
                     ? tools.serialize(v, k)
                     : encodeURIComponent(k) + '=' + encodeURIComponent(v));
@@ -255,7 +267,7 @@ define([], function() {
   };
 
   // emitter ===================================================================
-  function get_emitter() {
+  function get_emitter(config) {
     function Emitter(n) {
       n = n || this;
       n.__events = n.__events || {};

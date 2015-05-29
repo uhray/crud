@@ -51,7 +51,7 @@ Since this is a `Read` -- or an HTTP GET request -- you could go to your browser
 
 Tells crud to launch the application and begin listening for the routes. The *app* is the required [Express](http://expressjs.com/) application for listening.
 
-<a name="configure" href="#configure">#</a> crud.<b>configure</b>(<i>options</i>)
+<a name="backend-configure" href="#backend-configure">#</a> crud.<b>configure</b>(<i>options</i>)
 
 You can provide configurations to to the crud API. The *options* object is a key-value object that is merged onto the default configurations.
 
@@ -260,7 +260,7 @@ config = {
 
 #### Entity API
 
-The API is really simple. Basically, you create an <b>EntityObject</b> with `crud('/path/to/entity')`. NOTE: all arguments are joined together the way node's [path.join](http://nodejs.org/api/path.html#path_path_join_path1_path2) works.
+The API is really simple. Basically, you create an <b>EntityObject</b> with `crud('/path/to/entity')`. NOTE: all arguments are joined together via [crud-url](#crud-url).
 
 If any of the arguments have query string (e.g. `crud('/users?sortBy=10', '?limit=10)`), the query strings will be joined together. It's important to realize that if you put a query string in the uri path, it will travel with this crud object forever (on updates, etc). So if you just want the query string for a read (for example) you need to put that in the read <i>params</i> (see just below here).
 
@@ -329,6 +329,39 @@ crud.parallel({
   // If there was en error, it will immediately call this function with e being the error
 });
 ```
+
+<a name="crud-url" href="#crud-url">#</a> crud.<b>url</b>(\*args)
+
+This will create a url from the provided arguments. The default url is `'/'` and then any arguments get joined onto that.
+
+Additionally, if an argument is an object, it will become part of the query string at the end of the url.
+
+Example:
+
+```
+  crud.url('users', 7);  // => '/users/7'
+  crud.url('users', { name: 'joe' });  // => '/users?name=joe'
+  crud.url('users', { name: 'joe', age: 7 });  // => '/users?name=joe&age=7'
+  crud.url('users', { date: { $lte: new Date() } });  // => '/users?date[$lte]=2015-05-29T15:46:13.303Z'
+  crud.url('users', { age: { $in: [18, 19] } });  // => '/users?age[$in][0]=18&age[$in][1]=18
+```
+
+This can be really useful in conjunction with [crud.parallel](#crud-parallel):
+
+```
+  crud.parallel({
+    users: crud.url('/api/users', { age: 7 })
+    themes: crud.url('/api/themes', { date: { $lte: 7 } } })
+  }, function(e, d) {
+    console.log(e || d);
+  });
+```
+
+<a name="crud-create" href="#crud-create">#</a> crud.<b>create</b>(cfg)
+
+Creates a new instance of crud, which can be configured differently than the default instance.
+
+* <i>cfg</i>: Configuration options passed to [crud-configure](#configure).
 
 ### Events
 
