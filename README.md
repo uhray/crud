@@ -363,6 +363,10 @@ Creates a new instance of crud, which can be configured differently than the def
 
 * <i>cfg</i>: Configuration options passed to [crud-configure](#configure).
 
+<a name="crud-cancelAll" href="#crud-cancelAll">#</a> crud.<b>cancelAll</b>()
+
+Cancels all open crud requests. They will not call any callbacks and will not emit any events.
+
 ### Events
 
 The following events can be listened to via normal event emitters: `.on(event, fn)` or `.once(event, fn)`

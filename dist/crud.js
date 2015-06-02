@@ -159,6 +159,10 @@ define([], function() {
     crud.url = tools.join;
     crud.serialize = tools.serialize;
 
+    crud.cancelAll = function() {
+      config.openRequests = {};
+    };
+
     return crud;
   }
 
@@ -166,6 +170,8 @@ define([], function() {
 
   function get_tools(config) {
     var tools = {};
+
+    config.openRequests = config.openRequests || {};
 
     tools.noop = Function();
     tools.id = function(d) { return d; }
@@ -214,12 +220,26 @@ define([], function() {
       else return { data: d || {}, cb: cb };
     }
 
+    tools.uuid = function() {
+      function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+                   .toString(16)
+                   .substring(1);
+      };
+
+      return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+             s4() + '-' + s4() + s4() + s4();
+    };
+
     tools.request = function(method, url, data, cb) {
       var req = typeof(XMLHttpRequest) != 'undefined'
                   ? new XMLHttpRequest()
                   : new ActiveXObject('Microsoft.XMLHTTP'),
           isjson = typeof(FormData) === 'undefined' ||
-                        !(data instanceof FormData);
+                        !(data instanceof FormData),
+          reqId = tools.uuid();
+
+      config.openRequests[reqId] = true;
 
       if (config.credentials) req.withCredentials = true;
       req.open(method, url, true);
@@ -238,7 +258,11 @@ define([], function() {
           } else {
             error = { code: status, message: 'invalid status code' };
           }
-          return cb && cb(error, data);
+
+          if (config.openRequests[reqId]) {
+            delete config.openRequests[reqId];
+            return cb && cb(error, data);
+          }
         }
       }
       if (!isjson) req.send(data);
