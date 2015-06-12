@@ -1,6 +1,6 @@
 {
   "name": "node-crud",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "main": "lib/crud.js",
   "repository": "git@github.com:uhray/crud.git",
   "dependencies": {
