@@ -253,6 +253,7 @@ define([], function() {
             try {
               data = JSON.parse(req.responseText || '{}');
               error = config.getError(data);
+              if (!req.responseText) error = 'Empty response';
               data = config.getData(data);
             } catch (e) { error = 'invalid json response' };
           } else {
