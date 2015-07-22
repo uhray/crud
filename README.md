@@ -41,7 +41,7 @@ app.listen(3000);
 Since this is a `Read` -- or an HTTP GET request -- you could go to your browser and see 127.0.0.1:3000/api/users. It would respond with JSON:
 
 ```json
-{"error":null,"data":[{"name":"bobby tables"}]}
+{"error":null,"data":[{"name":"bobby tables"}],"metadata":{}}
 ```
 
 
@@ -105,7 +105,7 @@ Here you can chain middleware with the Crud format. This is where the usefulness
 
   * *query* - Initially, this is the query object on the HTTP request, so it will be equivalent to *request.query* from an Express request. (If the url is `/api/users?name=bobby`, then the query is `{ name: 'bobby' }`. **HOWEVER**, this is not actually just the same as *request.query*, because it has the *request.params* merged in as well. So, if you had `crud('/users/:_id').Read()` and the url was `/api/users/7?name=bobby`, then the query is actually `{name: 'bobby', _id: 7}`.
 
-  * *callback* - After you are done, whether synchronously or asynchronously, you can call this callback. It expects any of the following information: (*error*, *data*, *query*). If you provide an error, the chaining will be stopped. If you provided a second argument, it overrides the *data* value for all future chained middleware. If you provide a third argument, it overrides the *query* value for all future chained middleware. If you pass nothing, it just keeps chaining without modifying anything.
+  * *callback* - After you are done, whether synchronously or asynchronously, you can call this callback. It expects any of the following information: (*error*, *data*, *query*, *metadata*). If you provide an error, the chaining will be stopped. If you provided a second argument, it overrides the *data* value for all future chained middleware. If you provide a third argument, it overrides the *query* value for all future chained middleware. A fourth argument overrides the *metadata*. If you pass nothing, it just keeps chaining without modifying anything.
 
 Additionally, this `fn` is called with a pretty extensive `this` context:
 
@@ -122,6 +122,8 @@ Additionally, this `fn` is called with a pretty extensive `this` context:
   * *data* - This is the same as the *data* argument.
 
   * *query* - This is the same as the *query* argument.
+
+  * *metadata* - This is the metadata that can be passed along.
 
   * *callback* - This is the same as the *callback* argument.
 
