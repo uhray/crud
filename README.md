@@ -243,6 +243,7 @@ config = {
   credentials: false,
   getData: function(d) { return d && d.data; },
   getError: function(d) { return d && d.error; }
+  getMetadata: function(d) { return d && d.metadata; }
 };
 ```
 
@@ -257,6 +258,8 @@ config = {
 * <i>getData</i>: after the response text is converted to JSON, it calls this function to find out the data part of the response.
 
 * <i>getError</i>: after the response text is converted to JSON, it calls this function to find out the error part of the response.
+
+* <i>getMetadata</i>: after the response text is converted to JSON, it calls this function to find out the metadata part of the response.
 
 ### API
 
@@ -279,7 +282,9 @@ These commands are used to query the route.
 * <i>params</i>: queries API with given params. For read, this will be appended to the URL as a query string. For the rest it will be data that is posted, put, etc.
 * <i>callback</i>: callback function when query returns
 
-NOTE: in addition to invoking the callback, events will be emitted upon a response.
+> NOTE: in addition to invoking the callback, events will be emitted upon a response.
+
+> NOTE: on the read query, the third argument to the callback will be metadata if provided
 
 <a name="eo-path" href="#eo-path">#</a> EntityObject.<b>path</b>
 
@@ -308,6 +313,12 @@ crud('/users').read(function(e, users) {
 #### Utility Functions
 
 Everything stems from the [entity-api], but we are working on utility functions to help making use of that api better.
+
+  * [crud-parallel](#crud-parallel)
+  * [crud-url](#crud-url)
+  * [crud-create](#crud-create)
+  * [crud-cursor](#crud-cursor)
+  * [crud-cancelAll](#crud-cancelAll)
 
 <a name="crud-parallel" href="#crud-parallel">#</a> crud.<b>parallel</b>(<i>object</i>, <i>callback</i>)
 
@@ -364,6 +375,51 @@ This can be really useful in conjunction with [crud.parallel](#crud-parallel):
 Creates a new instance of crud, which can be configured differently than the default instance.
 
 * <i>cfg</i>: Configuration options passed to [crud-configure](#configure).
+
+<a name="crud-cursor" href="#crud-cursor">#</a> crud.<b>cursor</b>(*url, [perPage=100, page]*)
+
+Creates a read cursor that is good for pagination.
+
+Args:
+
+  * *url* - `Required` - this is the URL to do a read (or `GET`) query on. Use [crud.url](#crud-url) if you need.
+  * *perPage* - `Default = 100` - the number of records per page.
+  * *page* - `Default = 0` - the start page.
+
+Return Value: The return value is an object with two functions.
+
+  * value.**next**(*cb*) - Queries the next page. The first time this is called, it will query the *page* argument. The *cb* gets called with `(error, data, metadata`).
+  * value.**previous**(*cb*) - Queries the next page. The first time this is called, it will query the *page* argument. The *cb* gets called with `(error, data, metadata`).
+
+Per the above callbacks, metadata is structured like this:
+
+```json
+{
+    "records": 34666,
+    "page": 0,
+    "totalPages": 347,
+    "perPage": 100
+}
+```
+
+Example of cursor:
+
+```js
+var c = crud.cursor('/api/pds', 100);
+
+c.next(function(e, d, m) {
+  console.log('%d pds', d.length);
+  console.log('meta', m);
+  c.next(function(e, d, m) {
+    console.log('%d pds', d.length);
+    console.log('meta', m);
+    c.previous(function(e, d, m) {
+      console.log('%d pds', d.length);
+      console.log('meta', m);
+    });
+  });
+});
+```
 
 <a name="crud-cancelAll" href="#crud-cancelAll">#</a> crud.<b>cancelAll</b>()
 

@@ -9,7 +9,8 @@ define([], function() {
           protocol: '',
           credentials: false,
           getData: function(d) { return d && d.data; },
-          getError: function(d) { return d && d.error; }
+          getError: function(d) { return d && d.error; },
+          getMetadata: function(d) { return d && d.metadata; }
         },
         tools = get_tools(config),
         Emitter = get_emitter(config);
@@ -67,7 +68,7 @@ define([], function() {
           url = config.protocol +
                   tools.join(config.base, this.path, args.data || '');
 
-      tools.request('GET', url, null, function(e, d) {
+      tools.request('GET', url, null, function(e, d, m) {
         self.data = d;
         tools.defineProperty(d, '_crud', self);
         if (e && !args.cb) self.emit('error', e);
@@ -78,7 +79,7 @@ define([], function() {
           });
         }
         if (!e && d) self.emit('read', d);
-        args.cb && args.cb.call(self, e, d);
+        args.cb && args.cb.call(self, e, d, m);
       });
       return this;
     };
@@ -158,6 +159,26 @@ define([], function() {
     crud.create = makeCrud;
     crud.url = tools.join;
     crud.serialize = tools.serialize;
+
+    crud.cursor = function(url, perPage, startPage) {
+      var query = {
+            page: startPage || 0 - 1,
+            perPage: perPage || 100
+          },
+          obj = {};
+
+      obj.next = function(cb) {
+        ++query.page;
+        crud(url, query).read(cb);
+      };
+
+      obj.previous = function(cb) {
+        --query.page;
+        crud(url, query).read(cb);
+      };
+
+      return obj;
+    };
 
     crud.cancelAll = function() {
       config.openRequests = {};
@@ -246,7 +267,7 @@ define([], function() {
 
       if (isjson) req.setRequestHeader('Content-type', 'application/json');
       req.onreadystatechange = function() {
-        var status, data, error;
+        var status, data, error, meta;
         if (req.readyState == 4) {  // done
           status = req.status;
           if (status >= 200 && status < 300) {
@@ -254,6 +275,7 @@ define([], function() {
               data = JSON.parse(req.responseText || '{}');
               error = config.getError(data);
               if (!req.responseText) error = 'Empty response';
+              meta = config.getMetadata(data);
               data = config.getData(data);
             } catch (e) { error = 'invalid json response' };
           } else {
@@ -262,7 +284,7 @@ define([], function() {
 
           if (config.openRequests[reqId]) {
             delete config.openRequests[reqId];
-            return cb && cb(error, data);
+            return cb && cb(error, data, meta);
           }
         }
       }
