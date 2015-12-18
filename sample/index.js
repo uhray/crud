@@ -10,7 +10,7 @@ crud.entity('/users').Read()
   .use(function(req, res, next) {
     next();
   }).pipe(function(data, query, cb) {
-    cb(null, [ { name: 'bobby tables' } ]);
+    cb(null, [{ name: 'bobby tables' }]);
   }).pipe(function(data, query, cb) {
     cb();
   }).on('close', function(d) {

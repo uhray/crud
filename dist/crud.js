@@ -12,13 +12,13 @@ define([], function() {
           getError: function(d) { return d && d.error; },
           getMetadata: function(d) { return d && d.metadata; }
         },
-        tools = get_tools(config),
-        Emitter = get_emitter(config);
+        tools = getTools(config),
+        Emitter = getEmitter(config);
 
-    function crud() {
+    function Crud() {
       var c;
-      if (!(this instanceof crud)) {
-        c = new crud();
+      if (!(this instanceof Crud)) {
+        c = new Crud();
         c.path = tools.join.apply(c, arguments);
         return c;
       }
@@ -30,30 +30,29 @@ define([], function() {
 
     tools.merge(config, cfg || {});
 
-    // Configure =================================================================
+    // Configure ===============================================================
 
-    crud.configure = crud.config = function(obj) {
+    Crud.configure = Crud.config = function(obj) {
       return tools.merge(config, obj || {});
     }
 
+    // Crud.prototype ==========================================================
+    Crud.prototype = Emitter.prototype;
 
-    // crud.prototype ============================================================
-    crud.prototype = Emitter.prototype;
-
-    crud.prototype.toJSON = function() {
+    Crud.prototype.toJSON = function() {
       // polyfill so we can have the _crud value and not have it json'ed on IE8
       return undefined;
     };
 
-    crud.prototype.create = crud.prototype.c = function() {
+    Crud.prototype.create = Crud.prototype.c = function() {
       var self = this,
-          args = tools.xhr_args.apply(this, arguments),
+          args = tools.xhrargs.apply(this, arguments),
           url = config.protocol + tools.join(config.base, this.path);
 
       tools.request('POST', url, args.data, function(e, d) {
         if (e) self.emit('error', e);
         if (!e && d) {
-          tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
+          tools.defineProperty(d, '_crud', Crud(self.path, d[config.idGetter]));
           self.emit('create', d);
         }
         args.cb && args.cb.call(self, e, d);
@@ -62,9 +61,9 @@ define([], function() {
       return this;
     };
 
-    crud.prototype.read = crud.prototype.r = function() {
+    Crud.prototype.read = Crud.prototype.r = function() {
       var self = this,
-          args = tools.xhr_args.apply(this, arguments),
+          args = tools.xhrargs.apply(this, arguments),
           url = config.protocol +
                   tools.join(config.base, this.path, args.data || '');
 
@@ -84,15 +83,15 @@ define([], function() {
       return this;
     };
 
-    crud.prototype.update = crud.prototype.u = function() {
+    Crud.prototype.update = Crud.prototype.u = function() {
       var self = this,
-          args = tools.xhr_args.apply(this, arguments),
+          args = tools.xhrargs.apply(this, arguments),
           url = config.protocol + tools.join(config.base, this.path);
 
       tools.request('PUT', url, args.data, function(e, d) {
         if (e && !args.cb) self.emit('error', e);
         if (!e && d) {
-          tools.defineProperty(d, '_crud', crud(self.path, d[config.idGetter]));
+          tools.defineProperty(d, '_crud', Crud(self.path, d[config.idGetter]));
           self.emit('update', d);
         }
         args.cb && args.cb.call(self, e, d);
@@ -101,9 +100,9 @@ define([], function() {
       return this;
     };
 
-    crud.prototype.del = crud.prototype.d = function() {
+    Crud.prototype.del = Crud.prototype.d = function() {
       var self = this,
-          args = tools.xhr_args.apply(this, arguments),
+          args = tools.xhrargs.apply(this, arguments),
           url = config.protocol + tools.join(config.base, this.path);
 
       tools.request('DELETE', url, args.data, function(e, d) {
@@ -115,7 +114,7 @@ define([], function() {
       return this;
     };
 
-    crud.prototype.each = function(fn) {
+    Crud.prototype.each = function(fn) {
       var fn = fn || Function(),
           data = this.data || [],
           c, i;
@@ -123,15 +122,15 @@ define([], function() {
       if (!(data instanceof Array)) return;
 
       for (i = 0; i < data.length; i++) {
-        c = crud(this.path, data[i][config.idGetter]);
+        c = Crud(this.path, data[i][config.idGetter]);
         tools.defineProperty(data[i], '_crud', c);
-        fn.call(crud(this.path, data[i][config.idGetter]), data[i], i);
+        fn.call(Crud(this.path, data[i][config.idGetter]), data[i], i);
       }
     };
 
-    // crud fns ==================================================================
+    // crud fns ================================================================
 
-    crud.parallel = function(obj, cb) {
+    Crud.parallel = function(obj, cb) {
       var obj = obj || {},
           n = Object.keys(obj).length,
           result = {},
@@ -140,7 +139,7 @@ define([], function() {
           done, k;
 
       tools.forEach(obj, function(path, name) {
-        crud(path).read(function(e, d) {
+        Crud(path).read(function(e, d) {
           if (e) {
             if (done) return;
             done = true;
@@ -156,11 +155,12 @@ define([], function() {
       });
     };
 
-    crud.create = makeCrud;
-    crud.url = tools.join;
-    crud.serialize = tools.serialize;
+    Crud.create = makeCrud;
+    Crud.url = tools.join;
+    Crud.serialize = tools.serialize;
+    Crud.__tools = tools;
 
-    crud.cursor = function(url, perPage, startPage) {
+    Crud.cursor = function(url, perPage, startPage) {
       var query = {
             page: startPage || 0 - 1,
             perPage: perPage || 100
@@ -169,27 +169,27 @@ define([], function() {
 
       obj.next = function(cb) {
         ++query.page;
-        crud(url, query).read(cb);
+        Crud(url, query).read(cb);
       };
 
       obj.previous = function(cb) {
         --query.page;
-        crud(url, query).read(cb);
+        Crud(url, query).read(cb);
       };
 
       return obj;
     };
 
-    crud.cancelAll = function() {
+    Crud.cancelAll = function() {
       config.openRequests = {};
     };
 
-    return crud;
-  }
+    return Crud;
+  };
 
   // tools =====================================================================
 
-  function get_tools(config) {
+  function getTools(config) {
     var tools = {};
 
     config.openRequests = config.openRequests || {};
@@ -236,8 +236,8 @@ define([], function() {
       return a;
     }
 
-    tools.xhr_args = function(d, cb) {
-      if (typeof(d) === 'function') return { data: {}, cb: d };
+    tools.xhrargs = function(d, cb) {
+      if (typeof (d) === 'function') return { data: {}, cb: d };
       else return { data: d || {}, cb: cb };
     }
 
@@ -253,10 +253,10 @@ define([], function() {
     };
 
     tools.request = function(method, url, data, cb) {
-      var req = typeof(XMLHttpRequest) != 'undefined'
+      var req = typeof (XMLHttpRequest) != 'undefined'
                   ? new XMLHttpRequest()
                   : new ActiveXObject('Microsoft.XMLHTTP'),
-          isjson = typeof(FormData) === 'undefined' ||
+          isjson = typeof (FormData) === 'undefined' ||
                         !(data instanceof FormData),
           reqId = tools.uuid();
 
@@ -293,9 +293,12 @@ define([], function() {
       else req.send();
     };
 
-    tools.forEach = function(obj, cb) {
+    tools.forEach = function(obj, fn) {
       var k;
-      for (k in obj) cb(obj[k], k);
+
+      if (obj instanceof Array) {
+        obj.forEach(fn);
+      } else for (k in obj) fn(obj[k], k);
     };
 
     tools.defineProperty = function(obj, key, val) {
@@ -314,7 +317,7 @@ define([], function() {
   };
 
   // emitter ===================================================================
-  function get_emitter(config) {
+  function getEmitter(config) {
     function Emitter(n) {
       n = n || this;
       n.__events = n.__events || {};
