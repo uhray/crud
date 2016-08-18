@@ -1,382 +1,392 @@
-define([], function() {
+(function(self) {
 
-  return makeCrud();
+  if (typeof (define) !== 'undefined') {
+    define([], crud);
+  } else self.crud = crud();
 
-  function makeCrud(cfg) {
-    var config = {
-          base: '/api',
-          idGetter: '_id',
-          protocol: '',
-          credentials: false,
-          getData: function(d) { return d && d.data; },
-          getError: function(d) { return d && d.error; },
-          getMetadata: function(d) { return d && d.metadata; }
-        },
-        tools = getTools(config),
-        Emitter = getEmitter(config);
+  function crud() {
 
-    function Crud() {
-      var c;
-      if (!(this instanceof Crud)) {
-        c = new Crud();
-        c.path = tools.join.apply(c, arguments);
-        return c;
-      }
+    return makeCrud();
 
-      if (arguments.length) this.path = tools.join.apply(this, arguments);
-
-      Emitter(this);
-    }
-
-    tools.merge(config, cfg || {});
-
-    // Configure ===============================================================
-
-    Crud.configure = Crud.config = function(obj) {
-      return tools.merge(config, obj || {});
-    }
-
-    // Crud.prototype ==========================================================
-    Crud.prototype = Emitter.prototype;
-
-    Crud.prototype.toJSON = function() {
-      // polyfill so we can have the _crud value and not have it json'ed on IE8
-      return undefined;
-    };
-
-    Crud.prototype.create = Crud.prototype.c = function() {
-      var self = this,
-          args = tools.xhrargs.apply(this, arguments),
-          url = config.protocol + tools.join(config.base, this.path);
-
-      tools.request('POST', url, args.data, function(e, d) {
-        if (e) self.emit('error', e);
-        if (!e && d) {
-          tools.defineProperty(d, '_crud', Crud(self.path, d[config.idGetter]));
-          self.emit('create', d);
-        }
-        args.cb && args.cb.call(self, e, d);
-      });
-
-      return this;
-    };
-
-    Crud.prototype.read = Crud.prototype.r = function() {
-      var self = this,
-          args = tools.xhrargs.apply(this, arguments),
-          url = config.protocol +
-                  tools.join(config.base, this.path, args.data || '');
-
-      tools.request('GET', url, null, function(e, d, m) {
-        self.data = d;
-        tools.defineProperty(d, '_crud', self);
-        if (e && !args.cb) self.emit('error', e);
-        if (!e && d instanceof Array) {
-          self.each(function(d, i) {
-            this.data = d;
-            self.emitCtx('each', this, d, i);
-          });
-        }
-        if (!e && d) self.emit('read', d);
-        args.cb && args.cb.call(self, e, d, m);
-      });
-      return this;
-    };
-
-    Crud.prototype.update = Crud.prototype.u = function() {
-      var self = this,
-          args = tools.xhrargs.apply(this, arguments),
-          url = config.protocol + tools.join(config.base, this.path);
-
-      tools.request('PUT', url, args.data, function(e, d) {
-        if (e && !args.cb) self.emit('error', e);
-        if (!e && d) {
-          tools.defineProperty(d, '_crud', Crud(self.path, d[config.idGetter]));
-          self.emit('update', d);
-        }
-        args.cb && args.cb.call(self, e, d);
-      });
-
-      return this;
-    };
-
-    Crud.prototype.del = Crud.prototype.d = function() {
-      var self = this,
-          args = tools.xhrargs.apply(this, arguments),
-          url = config.protocol + tools.join(config.base, this.path);
-
-      tools.request('DELETE', url, args.data, function(e, d) {
-        if (e && !args.cb) self.emit('error', e);
-        if (!e && d) self.emit('delete', d);
-        args.cb && args.cb.call(self, e, d);
-      });
-
-      return this;
-    };
-
-    Crud.prototype.each = function(fn) {
-      var fn = fn || Function(),
-          data = this.data || [],
-          c, i;
-
-      if (!(data instanceof Array)) return;
-
-      for (i = 0; i < data.length; i++) {
-        c = Crud(this.path, data[i][config.idGetter]);
-        tools.defineProperty(data[i], '_crud', c);
-        fn.call(Crud(this.path, data[i][config.idGetter]), data[i], i);
-      }
-    };
-
-    // crud fns ================================================================
-
-    Crud.parallel = function(obj, cb) {
-      var obj = obj || {},
-          n = Object.keys(obj).length,
-          result = {},
-          count = 0,
-          cb = cb || Function(),
-          done, k;
-
-      tools.forEach(obj, function(path, name) {
-        Crud(path).read(function(e, d) {
-          if (e) {
-            if (done) return;
-            done = true;
-            return cb(e, result);
-          }
-
-          result[name] = d;
-          if (++count == n && !done) {
-            done = true;
-            setTimeout(function() { cb(null, result); }, 0);
-          }
-        });
-      });
-    };
-
-    Crud.create = makeCrud;
-    Crud.url = tools.join;
-    Crud.serialize = tools.serialize;
-    Crud.__tools = tools;
-
-    Crud.cursor = function(url, perPage, startPage) {
-      var query = {
-            page: startPage || 0 - 1,
-            perPage: perPage || 100
+    function makeCrud(cfg) {
+      var config = {
+            base: '/api',
+            idGetter: '_id',
+            protocol: '',
+            credentials: false,
+            getData: function(d) { return d && d.data; },
+            getError: function(d) { return d && d.error; },
+            getMetadata: function(d) { return d && d.metadata; }
           },
-          obj = {};
+          tools = getTools(config),
+          Emitter = getEmitter(config);
 
-      obj.next = function(cb) {
-        ++query.page;
-        Crud(url, query).read(cb);
-      };
-
-      obj.previous = function(cb) {
-        --query.page;
-        Crud(url, query).read(cb);
-      };
-
-      return obj;
-    };
-
-    Crud.cancelAll = function() {
-      config.openRequests = {};
-    };
-
-    return Crud;
-  };
-
-  // tools =====================================================================
-
-  function getTools(config) {
-    var tools = {};
-
-    config.openRequests = config.openRequests || {};
-
-    tools.noop = Function();
-    tools.id = function(d) { return d; }
-
-    tools.argArray = function(args) {
-      return Array.prototype.slice.call(args, 0);
-    }
-
-    tools.join = function() {
-      var query = '',
-          arr = tools.argArray(arguments).map(function(d) {
-            var d = typeof d == 'object' ? '?' + tools.serialize(d) : d,
-                s;
-
-            s = (d && String(d) || '').split('?');
-            if (s.length == 1) return d;
-            if (query) query += '&';
-            query += s[1];
-            return s[0];
-          }).filter(tools.id);
-
-      return arr.join('/').replace(/\/+/g, '/') + (query ? '?' + query : '');
-    }
-
-    tools.serialize = function(obj, prefix) {
-      var str = [], p, k;
-      for (p in obj) {
-        if (obj.hasOwnProperty(p)) {
-          k = prefix ? prefix + '[' + p + ']' : p, v = obj[p];
-          if (v instanceof Date) v = JSON.stringify(v);
-          str.push(typeof v == 'object'
-                    ? tools.serialize(v, k)
-                    : encodeURIComponent(k) + '=' + encodeURIComponent(v));
+      function Crud() {
+        var c;
+        if (!(this instanceof Crud)) {
+          c = new Crud();
+          c.path = tools.join.apply(c, arguments);
+          return c;
         }
+
+        if (arguments.length) this.path = tools.join.apply(this, arguments);
+
+        Emitter(this);
       }
-      return str.join('&');
-    }
 
-    tools.merge = function(a, b) {
-      for (var k in b) a[k] = b[k];
-      return a;
-    }
+      tools.merge(config, cfg || {});
 
-    tools.xhrargs = function(d, cb) {
-      if (typeof (d) === 'function') return { data: {}, cb: d };
-      else return { data: d || {}, cb: cb };
-    }
+      // Configure =============================================================
 
-    tools.uuid = function() {
-      function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-                   .toString(16)
-                   .substring(1);
+      Crud.configure = Crud.config = function(obj) {
+        return tools.merge(config, obj || {});
+      }
+
+      // Crud.prototype ========================================================
+      Crud.prototype = Emitter.prototype;
+
+      Crud.prototype.toJSON = function() {
+        // polyfill so we can have the _crud
+        // value and not have it json'ed on IE8
+        return undefined;
       };
 
-      return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-             s4() + '-' + s4() + s4() + s4();
-    };
+      Crud.prototype.create = Crud.prototype.c = function() {
+        var self = this,
+            args = tools.xhrargs.apply(this, arguments),
+            url = config.protocol + tools.join(config.base, this.path);
 
-    tools.request = function(method, url, data, cb) {
-      var req = typeof (XMLHttpRequest) != 'undefined'
-                  ? new XMLHttpRequest()
-                  : new ActiveXObject('Microsoft.XMLHTTP'),
-          isjson = typeof (FormData) === 'undefined' ||
-                        !(data instanceof FormData),
-          reqId = tools.uuid();
-
-      config.openRequests[reqId] = true;
-
-      if (config.credentials) req.withCredentials = true;
-      req.open(method, url, true);
-
-      if (isjson) req.setRequestHeader('Content-type', 'application/json');
-      req.onreadystatechange = function() {
-        var status, data, error, meta;
-        if (req.readyState == 4) {  // done
-          status = req.status;
-          if (status >= 200 && status < 300) {
-            try {
-              data = JSON.parse(req.responseText || '{}');
-              error = config.getError(data);
-              if (!req.responseText) error = 'Empty response';
-              meta = config.getMetadata(data);
-              data = config.getData(data);
-            } catch (e) { error = 'invalid json response' };
-          } else {
-            error = { code: status, message: 'invalid status code' };
+        tools.request('POST', url, args.data, function(e, d) {
+          if (e) self.emit('error', e);
+          if (!e && d) {
+            tools.defineProperty(d, '_crud',
+                                 Crud(self.path, d[config.idGetter]));
+            self.emit('create', d);
           }
-
-          if (config.openRequests[reqId]) {
-            delete config.openRequests[reqId];
-            return cb && cb(error, data, meta);
-          }
-        }
-      }
-      if (!isjson) req.send(data);
-      else if (data) req.send(JSON.stringify(data));
-      else req.send();
-    };
-
-    tools.forEach = function(obj, fn) {
-      var k;
-
-      if (obj instanceof Array) {
-        obj.forEach(fn);
-      } else for (k in obj) fn(obj[k], k);
-    };
-
-    tools.defineProperty = function(obj, key, val) {
-      if (!(obj instanceof Object)) return;
-      try {
-        Object.defineProperty(obj, key, {
-          enumerable: false,
-          value: val
+          args.cb && args.cb.call(self, e, d);
         });
-      } catch (e) {  // fallback
-        obj[key] = val;
-      }
+
+        return this;
+      };
+
+      Crud.prototype.read = Crud.prototype.r = function() {
+        var self = this,
+            args = tools.xhrargs.apply(this, arguments),
+            url = config.protocol +
+                    tools.join(config.base, this.path, args.data || '');
+
+        tools.request('GET', url, null, function(e, d, m) {
+          self.data = d;
+          tools.defineProperty(d, '_crud', self);
+          if (e && !args.cb) self.emit('error', e);
+          if (!e && d instanceof Array) {
+            self.each(function(d, i) {
+              this.data = d;
+              self.emitCtx('each', this, d, i);
+            });
+          }
+          if (!e && d) self.emit('read', d);
+          args.cb && args.cb.call(self, e, d, m);
+        });
+        return this;
+      };
+
+      Crud.prototype.update = Crud.prototype.u = function() {
+        var self = this,
+            args = tools.xhrargs.apply(this, arguments),
+            url = config.protocol + tools.join(config.base, this.path);
+
+        tools.request('PUT', url, args.data, function(e, d) {
+          if (e && !args.cb) self.emit('error', e);
+          if (!e && d) {
+            tools.defineProperty(d, '_crud',
+                                 Crud(self.path, d[config.idGetter]));
+            self.emit('update', d);
+          }
+          args.cb && args.cb.call(self, e, d);
+        });
+
+        return this;
+      };
+
+      Crud.prototype.del = Crud.prototype.d = function() {
+        var self = this,
+            args = tools.xhrargs.apply(this, arguments),
+            url = config.protocol + tools.join(config.base, this.path);
+
+        tools.request('DELETE', url, args.data, function(e, d) {
+          if (e && !args.cb) self.emit('error', e);
+          if (!e && d) self.emit('delete', d);
+          args.cb && args.cb.call(self, e, d);
+        });
+
+        return this;
+      };
+
+      Crud.prototype.each = function(fn) {
+        var fn = fn || Function(),
+            data = this.data || [],
+            c, i;
+
+        if (!(data instanceof Array)) return;
+
+        for (i = 0; i < data.length; i++) {
+          c = Crud(this.path, data[i][config.idGetter]);
+          tools.defineProperty(data[i], '_crud', c);
+          fn.call(Crud(this.path, data[i][config.idGetter]), data[i], i);
+        }
+      };
+
+      // crud fns ==============================================================
+
+      Crud.parallel = function(obj, cb) {
+        var obj = obj || {},
+            n = Object.keys(obj).length,
+            result = {},
+            count = 0,
+            cb = cb || Function(),
+            done, k;
+
+        tools.forEach(obj, function(path, name) {
+          Crud(path).read(function(e, d) {
+            if (e) {
+              if (done) return;
+              done = true;
+              return cb(e, result);
+            }
+
+            result[name] = d;
+            if (++count == n && !done) {
+              done = true;
+              setTimeout(function() { cb(null, result); }, 0);
+            }
+          });
+        });
+      };
+
+      Crud.create = makeCrud;
+      Crud.url = tools.join;
+      Crud.serialize = tools.serialize;
+      Crud.__tools = tools;
+
+      Crud.cursor = function(url, perPage, startPage) {
+        var query = {
+              page: startPage || 0 - 1,
+              perPage: perPage || 100
+            },
+            obj = {};
+
+        obj.next = function(cb) {
+          ++query.page;
+          Crud(url, query).read(cb);
+        };
+
+        obj.previous = function(cb) {
+          --query.page;
+          Crud(url, query).read(cb);
+        };
+
+        return obj;
+      };
+
+      Crud.cancelAll = function() {
+        config.openRequests = {};
+      };
+
+      return Crud;
     };
 
-    return tools;
-  };
+    // tools ===================================================================
 
-  // emitter ===================================================================
-  function getEmitter(config) {
-    function Emitter(n) {
-      n = n || this;
-      n.__events = n.__events || {};
-      n.__once = n.__once || {};
-    }
+    function getTools(config) {
+      var tools = {};
 
-    Emitter.prototype.on = function(name, fn) {
-      fn = fn || Function();
-      this.__events[name] = (this.__events[name] || [])
-      this.__events[name].push(fn);
-    }
+      config.openRequests = config.openRequests || {};
 
-    Emitter.prototype.once = function(name, fn) {
-      fn = fn || Function();
-      this.__once[name] = (this.__once[name] || []);
-      this.__once[name].push(fn);
-    }
+      tools.noop = Function();
+      tools.id = function(d) { return d; }
 
-    Emitter.prototype.off = function(name, fn) {
-      var i;
-
-      fn = fn || Function();
-      i = (this.__events[name] || []).indexOf(fn);
-      if (~i) this.__events[name].splice(i, 1);
-
-      i = (this.__once[name] || []).indexOf(fn);
-      if (~i) this.__once[name].splice(i, 1);
-    }
-
-    Emitter.prototype.emit = function(name) {
-      var args = [].slice.call(arguments),
-          es = (this.__events[name] || []).slice(),
-          i, self = this;
-
-      args.shift();
-      es.push.apply(es, this.__once[name] || []);
-
-      for (i = 0; i < es.length; i++) {
-        es[i].apply(self, args);
+      tools.argArray = function(args) {
+        return Array.prototype.slice.call(args, 0);
       }
 
-      this.__once[name] = [];
-    }
+      tools.join = function() {
+        var query = '',
+            arr = tools.argArray(arguments).map(function(d) {
+              var d = typeof d == 'object' ? '?' + tools.serialize(d) : d,
+                  s;
 
-    Emitter.prototype.emitCtx = function(name, ctx) {
-      var args = [].slice.call(arguments),
-          es = (this.__events[name] || []).slice(),
-          i, self = this;
+              s = (d && String(d) || '').split('?');
+              if (s.length == 1) return d;
+              if (query) query += '&';
+              query += s[1];
+              return s[0];
+            }).filter(tools.id);
 
-      args.shift(); args.shift();
-      es.push.apply(es, this.__once[name] || []);
-
-      for (i = 0; i < es.length; i++) {
-        es[i].apply(ctx, args);
+        return arr.join('/').replace(/\/+/g, '/') + (query ? '?' + query : '');
       }
 
-      this.__once[name] = [];
-    }
+      tools.serialize = function(obj, prefix) {
+        var str = [], p, k;
+        for (p in obj) {
+          if (obj.hasOwnProperty(p)) {
+            k = prefix ? prefix + '[' + p + ']' : p, v = obj[p];
+            if (v instanceof Date) v = JSON.stringify(v);
+            str.push(typeof v == 'object'
+                      ? tools.serialize(v, k)
+                      : encodeURIComponent(k) + '=' + encodeURIComponent(v));
+          }
+        }
+        return str.join('&');
+      }
 
-    return Emitter;
+      tools.merge = function(a, b) {
+        for (var k in b) a[k] = b[k];
+        return a;
+      }
+
+      tools.xhrargs = function(d, cb) {
+        if (typeof (d) === 'function') return { data: {}, cb: d };
+        else return { data: d || {}, cb: cb };
+      }
+
+      tools.uuid = function() {
+        function s4() {
+          return Math.floor((1 + Math.random()) * 0x10000)
+                     .toString(16)
+                     .substring(1);
+        };
+
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+               s4() + '-' + s4() + s4() + s4();
+      };
+
+      tools.request = function(method, url, data, cb) {
+        var req = typeof (XMLHttpRequest) != 'undefined'
+                    ? new XMLHttpRequest()
+                    : new ActiveXObject('Microsoft.XMLHTTP'),
+            isjson = typeof (FormData) === 'undefined' ||
+                          !(data instanceof FormData),
+            reqId = tools.uuid();
+
+        config.openRequests[reqId] = true;
+
+        if (config.credentials) req.withCredentials = true;
+        req.open(method, url, true);
+
+        if (isjson) req.setRequestHeader('Content-type', 'application/json');
+        req.onreadystatechange = function() {
+          var status, data, error, meta;
+          if (req.readyState == 4) {  // done
+            status = req.status;
+            if (status >= 200 && status < 300) {
+              try {
+                data = JSON.parse(req.responseText || '{}');
+                error = config.getError(data);
+                if (!req.responseText) error = 'Empty response';
+                meta = config.getMetadata(data);
+                data = config.getData(data);
+              } catch (e) { error = 'invalid json response' };
+            } else {
+              error = { code: status, message: 'invalid status code' };
+            }
+
+            if (config.openRequests[reqId]) {
+              delete config.openRequests[reqId];
+              return cb && cb(error, data, meta);
+            }
+          }
+        }
+        if (!isjson) req.send(data);
+        else if (data) req.send(JSON.stringify(data));
+        else req.send();
+      };
+
+      tools.forEach = function(obj, fn) {
+        var k;
+
+        if (obj instanceof Array) {
+          obj.forEach(fn);
+        } else for (k in obj) fn(obj[k], k);
+      };
+
+      tools.defineProperty = function(obj, key, val) {
+        if (!(obj instanceof Object)) return;
+        try {
+          Object.defineProperty(obj, key, {
+            enumerable: false,
+            value: val
+          });
+        } catch (e) {  // fallback
+          obj[key] = val;
+        }
+      };
+
+      return tools;
+    };
+
+    // emitter =================================================================
+    function getEmitter(config) {
+      function Emitter(n) {
+        n = n || this;
+        n.__events = n.__events || {};
+        n.__once = n.__once || {};
+      }
+
+      Emitter.prototype.on = function(name, fn) {
+        fn = fn || Function();
+        this.__events[name] = (this.__events[name] || [])
+        this.__events[name].push(fn);
+      }
+
+      Emitter.prototype.once = function(name, fn) {
+        fn = fn || Function();
+        this.__once[name] = (this.__once[name] || []);
+        this.__once[name].push(fn);
+      }
+
+      Emitter.prototype.off = function(name, fn) {
+        var i;
+
+        fn = fn || Function();
+        i = (this.__events[name] || []).indexOf(fn);
+        if (~i) this.__events[name].splice(i, 1);
+
+        i = (this.__once[name] || []).indexOf(fn);
+        if (~i) this.__once[name].splice(i, 1);
+      }
+
+      Emitter.prototype.emit = function(name) {
+        var args = [].slice.call(arguments),
+            es = (this.__events[name] || []).slice(),
+            i, self = this;
+
+        args.shift();
+        es.push.apply(es, this.__once[name] || []);
+
+        for (i = 0; i < es.length; i++) {
+          es[i].apply(self, args);
+        }
+
+        this.__once[name] = [];
+      }
+
+      Emitter.prototype.emitCtx = function(name, ctx) {
+        var args = [].slice.call(arguments),
+            es = (this.__events[name] || []).slice(),
+            i, self = this;
+
+        args.shift(); args.shift();
+        es.push.apply(es, this.__once[name] || []);
+
+        for (i = 0; i < es.length; i++) {
+          es[i].apply(ctx, args);
+        }
+
+        this.__once[name] = [];
+      }
+
+      return Emitter;
+    }
   }
-});
+})(window);
