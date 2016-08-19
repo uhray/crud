@@ -16,7 +16,8 @@
             credentials: false,
             getData: function(d) { return d && d.data; },
             getError: function(d) { return d && d.error; },
-            getMetadata: function(d) { return d && d.metadata; }
+            getMetadata: function(d) { return d && d.metadata; },
+            defaultQuery: {}
           },
           tools = getTools(config),
           Emitter = getEmitter(config);
@@ -54,7 +55,8 @@
       Crud.prototype.create = Crud.prototype.c = function() {
         var self = this,
             args = tools.xhrargs.apply(this, arguments),
-            url = config.protocol + tools.join(config.base, this.path);
+            url = config.protocol +
+                  tools.join(config.base, this.path, config.defaultQuery);
 
         tools.request('POST', url, args.data, function(e, d) {
           if (e) self.emit('error', e);
@@ -73,7 +75,8 @@
         var self = this,
             args = tools.xhrargs.apply(this, arguments),
             url = config.protocol +
-                    tools.join(config.base, this.path, args.data || '');
+                    tools.join(config.base, this.path, args.data || '',
+                               config.defaultQuery);
 
         tools.request('GET', url, null, function(e, d, m) {
           self.data = d;
@@ -94,7 +97,8 @@
       Crud.prototype.update = Crud.prototype.u = function() {
         var self = this,
             args = tools.xhrargs.apply(this, arguments),
-            url = config.protocol + tools.join(config.base, this.path);
+            url = config.protocol +
+                  tools.join(config.base, this.path, config.defaultQuery);
 
         tools.request('PUT', url, args.data, function(e, d) {
           if (e && !args.cb) self.emit('error', e);
@@ -112,7 +116,8 @@
       Crud.prototype.del = Crud.prototype.d = function() {
         var self = this,
             args = tools.xhrargs.apply(this, arguments),
-            url = config.protocol + tools.join(config.base, this.path);
+            url = config.protocol +
+                  tools.join(config.base, this.path, config.defaultQuery);
 
         tools.request('DELETE', url, args.data, function(e, d) {
           if (e && !args.cb) self.emit('error', e);

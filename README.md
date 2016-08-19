@@ -243,7 +243,8 @@ config = {
   credentials: false,
   getData: function(d) { return d && d.data; },
   getError: function(d) { return d && d.error; }
-  getMetadata: function(d) { return d && d.metadata; }
+  getMetadata: function(d) { return d && d.metadata; },
+  defaultQuery: {}
 };
 ```
 
@@ -260,6 +261,8 @@ config = {
 * <i>getError</i>: after the response text is converted to JSON, it calls this function to find out the error part of the response.
 
 * <i>getMetadata</i>: after the response text is converted to JSON, it calls this function to find out the metadata part of the response.
+
+* <i>defaultQuery</i>: A query object that will be appended to every request. Useful for an API token or something like that.
 
 ### API
 
