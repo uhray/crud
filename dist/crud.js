@@ -17,7 +17,9 @@
             getData: function(d) { return d && d.data; },
             getError: function(d) { return d && d.error; },
             getMetadata: function(d) { return d && d.metadata; },
-            defaultQuery: {}
+            defaultQuery: {},
+            blockingDelay: 100,
+            blockers: {}
           },
           tools = getTools(config),
           Emitter = getEmitter(config);
@@ -46,6 +48,11 @@
       // Crud.prototype ========================================================
       Crud.prototype = Emitter.prototype;
 
+      Crud.prototype.block = function() {
+        this.isBlocking = true;
+        return this;
+      };
+
       Crud.prototype.toJSON = function() {
         // polyfill so we can have the _crud
         // value and not have it json'ed on IE8
@@ -66,7 +73,7 @@
             self.emit('create', d);
           }
           args.cb && args.cb.call(self, e, d);
-        });
+        }, this);
 
         return this;
       };
@@ -90,7 +97,7 @@
           }
           if (!e && d) self.emit('read', d);
           args.cb && args.cb.call(self, e, d, m);
-        });
+        }, this);
         return this;
       };
 
@@ -108,7 +115,7 @@
             self.emit('update', d);
           }
           args.cb && args.cb.call(self, e, d);
-        });
+        }, this);
 
         return this;
       };
@@ -123,7 +130,7 @@
           if (e && !args.cb) self.emit('error', e);
           if (!e && d) self.emit('delete', d);
           args.cb && args.cb.call(self, e, d);
-        });
+        }, this);
 
         return this;
       };
@@ -266,7 +273,7 @@
                s4() + '-' + s4() + s4() + s4();
       };
 
-      tools.request = function(method, url, data, cb) {
+      tools.request = function(method, url, data, cb, context) {
         var req = typeof (XMLHttpRequest) != 'undefined'
                     ? new XMLHttpRequest()
                     : new ActiveXObject('Microsoft.XMLHTTP'),
@@ -276,12 +283,26 @@
 
         config.openRequests[reqId] = true;
 
+        // If is blocking and blocked, silently go away
+        if (context.isBlocking && config.blockers[context.path]) return;
+
+        // Else block the next guy
+        else if (context.isBlocking) config.blockers[context.path] = true;
+
         if (config.credentials) req.withCredentials = true;
         req.open(method, url, true);
 
         if (isjson) req.setRequestHeader('Content-type', 'application/json');
         req.onreadystatechange = function() {
           var status, data, error, meta;
+
+          // Unlblock in config.blockingDelay time if isBlocking
+          if (context.isBlocking) {
+            setTimeout(function() {
+              config.blockers[context.path] = false;
+            }, config.blockingDelay);
+          };
+
           if (req.readyState == 4) {  // done
             status = req.status;
             if (status >= 200 && status < 300) {

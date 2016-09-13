@@ -244,7 +244,8 @@ config = {
   getData: function(d) { return d && d.data; },
   getError: function(d) { return d && d.error; }
   getMetadata: function(d) { return d && d.metadata; },
-  defaultQuery: {}
+  defaultQuery: {},
+  blockingDelay: 100
 };
 ```
 
@@ -263,6 +264,8 @@ config = {
 * <i>getMetadata</i>: after the response text is converted to JSON, it calls this function to find out the metadata part of the response.
 
 * <i>defaultQuery</i>: A query object that will be appended to every request. Useful for an API token or something like that.
+
+* <i>blockingDelay</i>: Time in milliseconds after a [blocking route](blocking-routes) before unblocking it.
 
 ### API
 
@@ -311,6 +314,38 @@ crud('/users').read(function(e, users) {
   });
 })
 
+```
+
+#### Blocking Routes
+
+Let's say you're doing a route like "create a user" (or `crud('/api/users').create()`). You may wish to ensure that the create function doesn't get called twice from a user double clicking or something.
+
+To fix that, you can block the path from being called again until after the function is done.
+
+Example:
+
+```js
+  crud('/api/users').block().create(newUser, function(e, user) {
+    console.log('first time');
+  });
+
+  crud('/api/users').block().create(newUser, function(e, user) {
+    console.log('second time');
+  });
+```
+
+In this instance, only the first `console.log` will be seen. The second will be ignored because the first will not be done yet. Additionally, we wait an additional 100ms (by default, but configurable), after the callback occurs to allow you to change the HTML to prevent a user from double clicking here.
+
+As a word of caution, in the following example, both `console.logs` will occur because the second is not blocking. Blocking only blocks other blocking calls.
+
+```js
+  crud('/api/users').block().create(newUser, function(e, user) {
+    console.log('first time');
+  });
+
+  crud('/api/users').create(newUser, function(e, user) {
+    console.log('second time');
+  });
 ```
 
 #### Utility Functions
