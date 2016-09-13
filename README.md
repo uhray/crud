@@ -265,7 +265,7 @@ config = {
 
 * <i>defaultQuery</i>: A query object that will be appended to every request. Useful for an API token or something like that.
 
-* <i>blockingDelay</i>: Time in milliseconds after a [blocking route](blocking-routes) before unblocking it.
+* <i>blockingDelay</i>: Time in milliseconds after a [blocking route](#blocking-routes) before unblocking it.
 
 ### API
 
