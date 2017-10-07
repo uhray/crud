@@ -235,7 +235,8 @@
               return s[0];
             }).filter(tools.id);
 
-        return arr.join('/').replace(/\/+/g, '/') + (query ? '?' + query : '');
+        return arr.join('/').replace(/\/+/g, '/') + (query ? '?' + query : '')
+                  .replace(/&&/g, '&').replace(/&$/, '');
       }
 
       tools.serialize = function(obj, prefix) {

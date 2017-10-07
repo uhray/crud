@@ -110,6 +110,7 @@ describe('methods and entities', function() {
         },
         res = {
           set: function() { },
+          status: function() { },
           json: function(d) {
             jsonRes = d;
           }

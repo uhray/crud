@@ -6,6 +6,7 @@ var test = require('unit.js'),
     },
     deps, crud;
 
+global.window = {};
 require('../dist/crud');
 mockRequest();
 
@@ -82,7 +83,7 @@ describe('frontend - tools', function() {
           d.must.equal('--data--');
           m.must.equal('--metadata--');
           cb();
-        });
+        }, {});
       },
       function(cb) {
         XMLHttpRequest.prototype.mockResponse = function() {
@@ -98,7 +99,7 @@ describe('frontend - tools', function() {
           e.must.be.an.object();
           e.code.must.equal(404);
           cb();
-        });
+        }, {});
       },
       function(cb) {
         XMLHttpRequest.prototype.mockResponse = function() {
@@ -113,7 +114,7 @@ describe('frontend - tools', function() {
           XMLHttpRequest.prototype.mockResponse = null;
           e.must.equal('--error--');
           cb();
-        });
+        }, {});
       },
       function(cb) {
         XMLHttpRequest.prototype.mockResponse = function() {
@@ -123,7 +124,7 @@ describe('frontend - tools', function() {
         crud.__tools.request('get', '/api/users', '--data--',
                              function(e, d, m) {
           test.assert(false, 'Should not get here');
-        });
+        }, {});
         crud.cancelAll();
       }
     ], function(e) {
@@ -299,9 +300,9 @@ describe('utility fns', function() {
 
     cursor = crud.cursor('/users', 100, 0);
     cursor.next(function(e, d) {
-      d.must.equal('/api/users?page=0&perPage=100&');
+      d.must.equal('/api/users?page=0&perPage=100');
       cursor.next(function(e, d) {
-        d.must.equal('/api/users?page=1&perPage=100&');
+        d.must.equal('/api/users?page=1&perPage=100');
         cb();
       });
     });
