@@ -15,7 +15,7 @@ Install with `npm install node-crud`.
 
 ```js
 
-var crud = require('crud'),
+var crud = require('node-crud'),
     express = require('express'),
     app = express();
 
